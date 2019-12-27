@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 from scipy import special
+from mpl_toolkits.mplot3d import Axes3D  
 np.set_printoptions(threshold=np.inf)
 
 #---------------Find Span---------------#
@@ -313,3 +314,97 @@ def RatSurfaceDerivs(Aders,wders,d):
 # Aders,wders = SurfaceDerivsAlgAuv(n,p,U,m,q,V,P_1,W_1,u,v,d)
 # NURBS_Surface_Derivative = RatSurfaceDerivs(Aders,wders,d)
 # print(NURBS_Surface_Derivative[0][0])
+
+#----------------Point on NURBS Surface---------------------#
+
+#A modified version of Algorithm A4.3 from NURBS Book Page no. 134
+def NURBS_Surface_Point(n,p,U,m,q,V,Pw,u,v):
+    surface_point=np.zeros(3)
+    temp=np.zeros(q+1)
+    uspan = FindSpan(n,p,u,U)
+    Nu=BasisFuns(uspan,u,p,U)
+    vspan = FindSpan(m,q,v,V)
+    Nv=BasisFuns(vspan,v,q,V)
+    S=np.zeros(4)
+    for d in range(4):
+        for l in range(q+1):
+            temp[l]=0.0
+            for k in range(p+1):
+                temp[l]=temp[l]+Nu[k]*np.array(Pw[uspan-p+k][vspan-q+l][d])
+        Sw=0.0
+        for l in range(q+1):
+            Sw=Sw+Nv[l]*temp[l]
+        S[d]=Sw
+    #S = Sw/w
+    #S = Sw
+    surface_point=S[:-1]/S[-1]
+    return surface_point
+
+#----------------------------Test Case 1-----------------------------#
+# For plotting the co-ordinates are acording to x and y axis
+# Input control point vector to element routine as a transpose #
+
+#Can take input from knot vector function
+#Defining input parameters to funtion, here manually
+U = np.array([0., 0., 0., 1., 2., 3., 4., 4., 5., 5., 5.])
+V = np.array([0., 0., 0., 1., 2., 3., 3., 3.])
+u=2.5
+v=1
+p=2
+q=2
+n=(np.size(U)-1)-p-1
+m=(np.size(V)-1)-q-1
+
+Pw=np.array([[[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.]],
+            [[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.]],
+            [[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,6.,4.,1.],[0.,2.,0.,1.],[0.,2.,4.,1.]],
+            [[0.,2.,4.,1.],[4.,6.,8.,1.],[12.,24.,12.,1.],[4.,6.,0.,1.],[0.,2.,4.,1.]],
+            [[0.,2.,4.,1.],[4.,2.,4.,1.],[8.,6.,4.,1.],[4.,2.,0.,1.],[0.,2.,4.,1.]],
+            [[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.]],
+            [[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.]],
+            [[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.]]])
+
+
+S_r = NURBS_Surface_Point(n,p,U,m,q,V,Pw,u,v)
+print(S_r)
+
+#----------------------------Test Case 2-----------------------------#
+
+#----------------------------Plotting the Surface-----------------------------#
+
+U = np.array([0., 0., 1., 1.])
+V = np.array([0., 0., 1., 1.])
+#*****Should take care of this. It is generating divide by zero when u and v value equal to last knot vector value
+u_values=np.linspace(U[0],(U[-1]-0.1),5)
+v_values=np.linspace(V[0],(V[-1]-0.1),5)
+surface=np.zeros((np.size(u_values),np.size(v_values),3))
+p=1
+q=1
+n=(np.size(U)-1)-p-1
+m=(np.size(V)-1)-q-1
+Pw=np.array([[[0,0,0,1],[1,0,0,1]],
+          [[0,1,0,1],[1,1,0,1]]])
+for i,u in enumerate(u_values):
+    for j,v in enumerate(v_values):
+        S_r = NURBS_Surface_Point(n,np.copy(p),U,m,np.copy(q),V,Pw,u,v)
+        surface[i,j]=S_r
+# print(surface[0,:,0])
+# print(surface[:,1,1])
+y_values=surface[0,:,0]
+x_values=surface[:,1,1]
+X,Y=np.meshgrid(x_values,y_values)
+Z=np.zeros_like(X)
+
+from mpl_toolkits.mplot3d import Axes3D  
+# Axes3D import has side effects, it enables using projection='3d' in add_subplot
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+ax.plot_surface(X, Y, Z)
+
+ax.set_xlabel('X Label')
+ax.set_ylabel('Y Label')
+ax.set_zlabel('Z Label')
+
+plt.show()
