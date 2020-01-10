@@ -87,8 +87,10 @@ def B_matrix(xi,eta,Bu,Be):
         Bu[2,j2] = fdR_du[i2]
         #print(Bu[2,j2])
 
-        Be[0,i2]=fdR_du[i2]
-        Be[1,i2] = fdR_dv[i2]
+        #***Be matrix should be negative***#
+
+        Be[0,i2] = -fdR_du[i2]
+        Be[1,i2] = -fdR_dv[i2]
     return Bu,Be
 
 
