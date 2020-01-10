@@ -25,7 +25,7 @@ nSteps = len(allTimes)
 
 #Initializing global displcement vector and stress vector 
 #necp=Total number of nodes ndof = number of Dof per node 
-U_g_0=np.zeros((necp*ndof,1))
+U_g_0=np.zeros(((nudof+nedof)*necp,1))
 global_sigma = np.zeros([nSteps,nel,3,1])
 
 
@@ -42,10 +42,13 @@ for i in range(1):
     k=1
     while 1:
         #gauss_loc = np.zeros(nel)
-        Kt_g=np.zeros([ncp*ndof,ncp*ndof])
-        G_global=np.zeros((ncp*ndof,1))
-        F_g_int=np.zeros((ncp*ndof,1))
-        F_g_ext=np.zeros((ncp*ndof,1))
+        Kt_g=np.zeros([(nudof+nedof)*necp,(nudof+nedof)*necp])
+        G_global=np.zeros(((nudof+nedof)*necp,1))
+
+        # First 8 rows are mechanical forces next 4 rows are electrical forces
+        F_g_int=np.zeros(((nudof+nedof)*necp,1))
+        F_g_ext=np.zeros(((nudof+nedof)*necp,1))
+
         
         
 #---------------------------Connectivity loop------------------------------#
@@ -96,12 +99,15 @@ for i in range(1):
         u_g[1][0] = 0.
         u_g[4][0] = 0.
         u_g[5][0] = 0.
-        K_rg=np.delete(K_rg,[0,1,4,5],axis=0) #axis=0 is row
-        K_rg=np.delete(K_rg,[0,1,4,5],axis=1)
+        # Electrical bcs
+        u_g[8][0] = 0.
+        u_g[10][0] = 0.
+        K_rg=np.delete(K_rg,[0,1,4,5,8,10],axis=0) #axis=0 is row
+        K_rg=np.delete(K_rg,[0,1,4,5,8,10],axis=1)
         # K_rg=np.delete(K_rg,[0,1,2,3],axis=0) #axis=0 is row
         # K_rg=np.delete(K_rg,[0,1,2,3],axis=1)
         reduced_G_global=G_global
-        reduced_G_global=np.delete(reduced_G_global,[0,1,4,5],axis=0)
+        reduced_G_global=np.delete(reduced_G_global,[0,1,4,5,8,10],axis=0)
         # reduced_G_global=np.delete(reduced_G_global,[0,1,2,3],axis=0)
         dU_g=np.matmul(np.linalg.inv(K_rg),-reduced_G_global)
         #dU_g_insert=np.insert(dU_g,[0,1,2,3],0,axis=0)
@@ -113,6 +119,8 @@ for i in range(1):
         dU_g_insert=np.insert(dU_g_insert,[1],0,axis=0)
         dU_g_insert=np.insert(dU_g_insert,[4],0,axis=0)
         dU_g_insert=np.insert(dU_g_insert,[5],0,axis=0)
+        dU_g_insert=np.insert(dU_g_insert,[8],0,axis=0)
+        dU_g_insert=np.insert(dU_g_insert,[10],0,axis=0)
         u_g=u_g+dU_g_insert
         # print('F_External',F_g_ext)
         # print('F_Internal',F_g_int)

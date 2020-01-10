@@ -5,15 +5,21 @@ from scipy import special
 np.set_printoptions(threshold=np.inf)
 from Material_Properties import *
 
-def materialRoutine(epsilon, T_m):
+def materialRoutine(epsilon,electric_field, T_m):
     mu = youngs_modulus/(2*(1+poissons_ratio))
     lamda = (poissons_ratio*youngs_modulus)/((1+poissons_ratio)*(1-2*poissons_ratio))
     sigma_y = yield_stress
     # Calculating Material tangent stiffness matrix
     Ct = np.array([[2*mu+lamda,lamda,0],[lamda,2*mu+lamda,0],[0,0,mu]]) 
-    sigma  = np.matmul(Ct,epsilon) 
-    # returning Material tangent stiffness matrix and Updated stress to element routine
-    return Ct, sigma
+    sigma  = np.matmul(Ct,epsilon)-np.matmul(np.transpose(e),electric_field)
+    Electrical_Displacement = np.matmul(e,epsilon)-np.matmul(k,electric_field)
+
+
+    # returning Material tangent stiffness matrix, Updated stress to element routine,
+    # Piezoelectric constant matrix, Dielectric material constants
+    return Ct, e, k, sigma, Electrical_Displacement
+
+
 
 # C=materialRoutine([[0],[0],[0]], 1)
 # print(C)

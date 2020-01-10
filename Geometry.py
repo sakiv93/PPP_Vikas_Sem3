@@ -25,7 +25,8 @@ P_W_T = P_W.transpose((1,0,2))  #Here it is a 3D array (0,1,2) -- it is transpos
 
 
 d=1 #Derivatives need upto (k+l=d)
-ndof = 2 #Number of degrees of freedom on each node
+nudof = 2 #Number of displacement degrees of freedom on each node
+nedof = 1 #Number of electrical degrees of freedom on each node
 
 
 #----------Need not alter below variables--------------#
