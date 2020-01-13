@@ -96,18 +96,18 @@ for i in range(1):
         F_g_ext[6][0] = 100.
         G_global = G_global+(F_g_int-F_g_ext)
         u_g[0][0] = 0.
-        #u_g[1][0] = 0.
+        u_g[1][0] = 0.
+        u_g[3][0] = 0.
         u_g[4][0] = 0.
-        u_g[5][0] = 0.
         # Electrical bcs
         u_g[8][0] = 0.
         u_g[10][0] = 0.
-        K_rg=np.delete(K_rg,[0,4,5,8,10],axis=0) #axis=0 is row
-        K_rg=np.delete(K_rg,[0,4,5,8,10],axis=1)
+        K_rg=np.delete(K_rg,[0,1,3,4,8,10],axis=0) #axis=0 is row
+        K_rg=np.delete(K_rg,[0,1,3,4,8,10],axis=1)
         # K_rg=np.delete(K_rg,[0,1,2,3],axis=0) #axis=0 is row
         # K_rg=np.delete(K_rg,[0,1,2,3],axis=1)
         reduced_G_global=G_global
-        reduced_G_global=np.delete(reduced_G_global,[0,4,5,8,10],axis=0)
+        reduced_G_global=np.delete(reduced_G_global,[0,1,3,4,8,10],axis=0)
         # reduced_G_global=np.delete(reduced_G_global,[0,1,2,3],axis=0)
         dU_g=np.matmul(np.linalg.inv(K_rg),-reduced_G_global)
         #dU_g_insert=np.insert(dU_g,[0,1,2,3],0,axis=0)
@@ -116,9 +116,9 @@ for i in range(1):
         # dU_g_insert=np.insert(dU_g_insert,[0],0,axis=0)
         # dU_g_insert=np.insert(dU_g_insert,[0],0,axis=0)
         dU_g_insert=np.insert(dU_g,[0],0,axis=0)
-        #dU_g_insert=np.insert(dU_g_insert,[1],0,axis=0)
+        dU_g_insert=np.insert(dU_g_insert,[1],0,axis=0)
+        dU_g_insert=np.insert(dU_g_insert,[3],0,axis=0)
         dU_g_insert=np.insert(dU_g_insert,[4],0,axis=0)
-        dU_g_insert=np.insert(dU_g_insert,[5],0,axis=0)
         dU_g_insert=np.insert(dU_g_insert,[8],0,axis=0)
         dU_g_insert=np.insert(dU_g_insert,[10],0,axis=0)
         u_g=u_g+dU_g_insert

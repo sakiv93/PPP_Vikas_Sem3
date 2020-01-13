@@ -15,4 +15,5 @@ e = np.array([[0,0,0],[-5.207e-6,15.08e-6,0]])  #Units C/mm^2
 
 #---------------Dielectric material constants-----------------#
 k = np.array([[6.752e-12,0],[0,5.872e-12]])
+#k = np.array([[6.752e-12,0],[0,6.752e-12]])
 # Values taken from Userelement paper

@@ -12,7 +12,7 @@ def materialRoutine(epsilon,electric_field, T_m):
     # Calculating Material tangent stiffness matrix
     Ct = np.array([[2*mu+lamda,lamda,0],[lamda,2*mu+lamda,0],[0,0,mu]]) 
     sigma  = np.matmul(Ct,epsilon)-np.matmul(np.transpose(e),electric_field)
-    Electrical_Displacement = np.matmul(e,epsilon)-np.matmul(k,electric_field)
+    Electrical_Displacement = np.matmul(e,epsilon)+np.matmul(k,electric_field)
 
 
     # returning Material tangent stiffness matrix, Updated stress to element routine,
