@@ -1,3 +1,5 @@
+#-----------Before Converting to Displacement Driven-------------------#
+#----------- Following code is working for Coupling -------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math

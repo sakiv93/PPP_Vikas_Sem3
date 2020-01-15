@@ -1,3 +1,5 @@
+#-----------Before Converting to Displacement Driven-------------------#
+#----------- Following code is working for Coupling -------------------#
 import numpy as np
 
 yield_stress=210 #MPa

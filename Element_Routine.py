@@ -1,4 +1,5 @@
-
+#-----------Before Converting to Displacement Driven-------------------#
+#----------- Following code is working for Coupling -------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -27,9 +28,9 @@ def Jacobian12(j,xi,eta,elU,elV):
     dRy_deta =  dRx[0][1][1]
     J1 = np.array([[dRx_dxi,dRx_deta],
                 [dRy_dxi,dRy_deta]])
-    print('J1 Matrix : ',J1)
+    #print('J1 Matrix : ',J1)
     J1det = (dRx_dxi*dRy_deta)-(dRx_deta*dRy_dxi)
-    print('Determinat of J1 : ',J1det)
+    #print('Determinat of J1 : ',J1det)
     J1inv = np.linalg.inv(J1)
     #print('J1inv : ',J1inv)
     return J1det,J2det
@@ -131,8 +132,8 @@ def elementRoutine(U_e, T_m):
         #-------------------------Bu Matrix --------------------------#
 
         Bumatrix,Bematrix = B_matrix(xi,eta,Bu,Be)
-        print('Bu:',Bumatrix)
-        print('Be:',Bematrix)
+        #print('Bu:',Bumatrix)
+        #print('Be:',Bematrix)
 
         # U_u contains mechanical displcement from node 1 to 4, and U_phi contains electric potential from node 1 to 4
         U_u=U_e[0:8]
@@ -169,35 +170,35 @@ def elementRoutine(U_e, T_m):
         K_ME = K_ME + BueBe*J1det*J2det*wg
         K_EM = K_EM + BeeBu*J1det*J2det*wg
         K_EE = K_EE + BekBe*J1det*J2det*wg
-        print('KEE:',K_EE)
+        #print('KEE:',K_EE)
 
         #Arranging to Kt_e matrix 
         Kt_e[0:8,0:8]   = K_MM
         Kt_e[0:8,8:12]  = K_ME
         Kt_e[8:12,0:8]  = K_EM
         Kt_e[8:12,8:12] = K_EE
-        print('K_MM',Kt_e[0:8,0:8])
-        print('K_ME',Kt_e[0:8,8:12])
-        print('K_EM',Kt_e[8:12,0:8])
-        print('K_EE',Kt_e[8:12,8:12])
+        #print('K_MM',Kt_e[0:8,0:8])
+        #print('K_ME',Kt_e[0:8,8:12])
+        #print('K_EM',Kt_e[8:12,0:8])
+        #print('K_EE',Kt_e[8:12,8:12])
 
         #?????? Is this correct way of defining ??????#
         Fu_int_e= Fu_int_e+np.matmul(np.transpose(Bumatrix),sigma)*J1det*J2det*wg
         Fe_int_e= Fe_int_e+np.matmul(np.transpose(Bematrix),Electrical_Displacement)*J1det*J2det*wg
-        print(Fe_int_e)
+        #print(Fe_int_e)
 
         #Arranging to F_int matrix 
         F_int_e[0:nudof*necp] = Fu_int_e                              # 0 1 2 3 4 5 6 7
         F_int_e[nudof*necp:(nudof*necp+nedof*necp)] = Fe_int_e        # 8 9 10 11
-        print('Fu_int_e',Fu_int_e)
-        print('Fe_int_e',Fe_int_e)
-        print('F_int_e',F_int_e)
+        #print('Fu_int_e',Fu_int_e)
+        #print('Fe_int_e',Fe_int_e)
+        #print('F_int_e',F_int_e)
         #F_ext_e = np.zeros_like(F_int_e)
 
     #$$$$$     Didnt return gauss points co-ordinates     $$$$$#    
     #return Kt_e, F_int_e, F_ext_e,sigma
-    print('Stiffness_Matrix:',Kt_e)
-    print('Det of Stiffness_Matrix:',np.linalg.det(Kt_e))
+    #print('Stiffness_Matrix:',Kt_e)
+    #print('Det of Stiffness_Matrix:',np.linalg.det(Kt_e))
     return Kt_e, F_int_e, sigma
 
 

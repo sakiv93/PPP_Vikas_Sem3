@@ -1,3 +1,5 @@
+#-----------Before Converting to Displacement Driven-------------------#
+#----------- Following code is working for Coupling -------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -68,6 +70,7 @@ for i in range(1):
             #K_e,F_e_int,F_e_ext, sigma, r_gp = elementRoutine(u_e,tau,rnodes[j:j+2])
             #K_e,F_e_int,F_e_ext, sigma = elementRoutine(u_e,tau)
             K_e,F_e_int, sigma = elementRoutine(u_e,tau)
+            print(K_e)
             #$$$$ Connectivity loop to connect K_e ,F_g_int, F_g_ext to global $$$$#
             Kt_g = Kt_g+K_e
             F_g_int = F_e_int
