@@ -1,5 +1,5 @@
-#-----------Before Converting to Displacement Driven-------------------#
-#----------- Following code is working for Coupling -------------------#
+#-------------------------------Displacement Driven----------------------------------------#
+#----------- Following code is working for Displacement Driven Coupling -------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -11,9 +11,10 @@ def materialRoutine(epsilon,electric_field, T_m):
     mu = youngs_modulus/(2*(1+poissons_ratio))
     lamda = (poissons_ratio*youngs_modulus)/((1+poissons_ratio)*(1-2*poissons_ratio))
     sigma_y = yield_stress
+    
     # Calculating Material tangent stiffness matrix
     Ct = np.array([[2*mu+lamda,lamda,0],[lamda,2*mu+lamda,0],[0,0,mu]])
-    print('Ct',Ct)
+    #print('Ct',Ct)
     #Ct = np.array([[139000,74280,0],[74280,115400,0],[0,0,25640]])
 
     sigma  = np.matmul(Ct,epsilon)-np.matmul(np.transpose(e),electric_field)

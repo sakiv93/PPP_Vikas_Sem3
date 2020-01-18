@@ -1,5 +1,5 @@
-#-----------Before Converting to Displacement Driven-------------------#
-#----------- Following code is working for Coupling -------------------#
+#-------------------------------Displacement Driven----------------------------------------#
+#----------- Following code is working for Displacement Driven Coupling -------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -108,7 +108,7 @@ def elementRoutine(U_e, T_m):
     Fu_int_e=np.zeros((nudof*necp,1))
     Fe_int_e=np.zeros((nedof*necp,1))
     F_int_e=np.zeros(((nudof+nedof)*necp,1))
-    #F_ext_e=np.zeros((nudof*necp,1))
+    #F_ext_e=np.zeros(((nudof+nedof)*necp,1)
 
     #-----------Looping over gauss point-----------#
 
@@ -193,13 +193,13 @@ def elementRoutine(U_e, T_m):
         #print('Fu_int_e',Fu_int_e)
         #print('Fe_int_e',Fe_int_e)
         #print('F_int_e',F_int_e)
-        #F_ext_e = np.zeros_like(F_int_e)
+        F_ext_e = np.zeros_like(F_int_e)    
 
     #$$$$$     Didnt return gauss points co-ordinates     $$$$$#    
     #return Kt_e, F_int_e, F_ext_e,sigma
     #print('Stiffness_Matrix:',Kt_e)
     #print('Det of Stiffness_Matrix:',np.linalg.det(Kt_e))
-    return Kt_e, F_int_e, sigma
+    return Kt_e, F_int_e, F_ext_e, sigma, Electrical_Displacement
 
 
 #----------------Test case------------------#
