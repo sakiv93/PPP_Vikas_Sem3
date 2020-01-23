@@ -60,45 +60,133 @@
 	\tableofcontents
 	\clearpage
 	
-	\section{Introduction}
-	Among all the numerical methods Finite Element Methods (FEM) are more popularly used to find approximate solutions of partial differential equations. FEM approximates the Computer Aided Drawing (CAD) geometry by discretizing it into smaller geometries called elements. Such geometrical approximations may create numerical errors and seriously effect the accuracy of the solution.
-	Isogeometric analysis (IGA) is a technique to generate geometry using CAD concept of Non Uniform Rational B-Splines and analyse using its basis functions. !The pioneers of this technique are Tom Hughes and his group at The University of Texas at Austin!.
-	
-	
-	\subsection{Advantages of IGA over FEA}
-	\begin{description}
-		\item[$\bullet$]   The exact representation of the geometry for analysis rules out the possibility of geometrical approximations.
-		\item[$\bullet$]   A huge amount of time involved in finite element modelling can be avoided.
-	\end{description}
-	
-	\section{Non Uniform Rational B-Splines }
-	NURBS are very often used in computer-aided design(CAD), manufacturing (CAM) and engineering (CAE) due to its flexibility to represent complex geometries. NURBS curves and surfaces are considered as the generalization of B-Spline and Bezier curves and surfaces. A NURBS curve is defined by its order, control points and knot vectors.
-	
-	\subsection{Order }
-	!The order of a NURBS curve defines the number of nearby control points that influence any given point on the curve. The curve is represented mathematically by a polynomial of degree one less than the order of the curve.(WIKI)! (Difference b/w degree and order)
-	
-	\subsection{Control points }
-	!The control points determine the shape of the curve.[8] Typically, each point of the curve is computed by taking a weighted sum of a number of control points. The weight of each point varies according to the governing parameter. For a curve of degree d, the weight of any control point is only nonzero in d+1 intervals of the parameter space. Within those intervals, the weight changes according to a polynomial function (basis functions) of degree d. At the boundaries of the intervals, the basis functions go smoothly to zero, the smoothness being determined by the degree of the polynomial.(WIKI)!
-	
-	\subsection{Knot vector }
-	The knot vector is a sequence of parameter values that determines where and how the control points affect the NURBS curve. The number of knots is always equal to the number of control points plus curve degree plus one (i.e. number of control points plus curve order). The knot vector divides the parametric space in the intervals mentioned before, usually referred to as knot spans. Each time the parameter value enters a new knot span, a new control point becomes active, while an old control point is discarded. It follows that the values in the knot vector should be in nondecreasing order, so (0, 0, 1, 2, 3, 3) is valid while (0, 0, 2, 1, 3, 3) is not.(WIKI)!
-	\subsection{NURBS Curve and its properties }
-	The $p^{th}$ degree NURBS curve is given by
+\section{Introduction}
+Among all the numerical methods Finite Element Methods (FEM) are more popularly used to find approximate solutions of partial differential equations. FEM approximates the Computer Aided Drawing (CAD) geometry by discretizing it into smaller geometries called elements. Such geometrical approximations may create numerical errors and seriously effect the accuracy of the solution.
+Isogeometric analysis (IGA) is a technique to generate geometry using CAD concept of Non Uniform Rational B-Splines and analyse using its basis functions. !The pioneers of this technique are Tom Hughes and his group at The University of Texas at Austin!.
 
-	\begin{equation}
-	C(u) = \frac{\sum_{i=0}^{n}N_{i,p}(u)w_{i}P_{i}}{\sum_{i=0}^{n}N_{i,p}(u)w_{i}}
-	\end{equation}
-	refer NURBS book and write more info
-	\subsection{NURBS Surface and its properties }
-	A NURBS surface with degree p in u direction and degree q in v direction is defined as
-	\begin{equation}
-	S(u) = \frac{\sum_{i=0}^{n}\sum_{i=0}^{m}N_{i,p}(u)N_{j,q}(v)w_{i,j}P_{i,j}}{\sum_{i=0}^{n}\sum_{i=0}^{m}N_{i,p}(u)N_{j,q}(v)w_{i,j}}
-	\end{equation}
-	refer NURBS book and write more info
-	\section{Iso-geometric analysis}
-	
-	
-	
-	
-	
+
+\subsection{Advantages of IGA over FEA}
+\begin{description}
+	\item[$\bullet$]   The exact representation of the geometry for analysis rules out the possibility of geometrical approximations.
+	\item[$\bullet$]   A huge amount of time involved in finite element modelling can be avoided.
+\end{description}
+
+\section{Non Uniform Rational B-Splines }
+NURBS are very often used in computer-aided design(CAD), manufacturing (CAM) and engineering (CAE) due to its flexibility to represent complex geometries. NURBS curves and surfaces are considered as the generalization of B-Spline and Bezier curves and surfaces. A NURBS curve is defined by its order, control points and knot vectors.
+
+\subsection{Order }
+!The order of a NURBS curve defines the number of nearby control points that influence any given point on the curve. The curve is represented mathematically by a polynomial of degree one less than the order of the curve.(WIKI)! (Difference b/w degree and order)
+
+\subsection{Control points }
+!The control points determine the shape of the curve.[8] Typically, each point of the curve is computed by taking a weighted sum of a number of control points. The weight of each point varies according to the governing parameter. For a curve of degree d, the weight of any control point is only nonzero in d+1 intervals of the parameter space. Within those intervals, the weight changes according to a polynomial function (basis functions) of degree d. At the boundaries of the intervals, the basis functions go smoothly to zero, the smoothness being determined by the degree of the polynomial.(WIKI)!
+
+\subsection{Knot vector }
+The knot vector is a sequence of parameter values that determines where and how the control points affect the NURBS curve. The number of knots is always equal to the number of control points plus curve degree plus one (i.e. number of control points plus curve order). The knot vector divides the parametric space in the intervals mentioned before, usually referred to as knot spans. Each time the parameter value enters a new knot span, a new control point becomes active, while an old control point is discarded. It follows that the values in the knot vector should be in nondecreasing order, so (0, 0, 1, 2, 3, 3) is valid while (0, 0, 2, 1, 3, 3) is not.(WIKI)!
+\subsection{NURBS Curve and its properties }
+The $p^{th}$ degree NURBS curve is given by
+
+\begin{equation}
+C(u) = \frac{\sum_{i=0}^{n}N_{i,p}(u)w_{i}P_{i}}{\sum_{i=0}^{n}N_{i,p}(u)w_{i}}
+\end{equation}
+refer NURBS book and write more info
+\subsection{NURBS Surface and Solids }
+NURBS Surfaces and solids are generated by the tensor product between NURBS curve basis functions.
+A NURBS surface with degree p in u direction and degree q in v direction is defined as
+\begin{equation}
+S(u) = \frac{\sum_{i=0}^{n}\sum_{i=0}^{m}N_{i,p}(u)N_{j,q}(v)w_{i,j}P_{i,j}}{\sum_{i=0}^{n}\sum_{i=0}^{m}N_{i,p}(u)N_{j,q}(v)w_{i,j}}
+\end{equation}
+refer NURBS book and write more info
+\section{Iso-geometric analysis}
+
+
+\section{Mechanical Case}
+
+
+\subsection{Constitutive Equations}
+The governing equation for mechanical deformation is based on conservation of linear momentum which can be written as
+\begin{equation}
+\sigma_{ij,i} + b_j = 0
+\end{equation}
+where $ \sigma_{ij} $ and $ b_i $ is the Cauchy stress tensor and body force. Due to the static nature of the analysis the inertial term is not included in the eq().\\*
+Stress and strain are related by following constitutive equation
+\begin{equation}
+\sigma_{ij} = c_{ijkl} \epsilon_{kl}
+\end{equation}
+The infinitesimal strain theory is adopted for the analyis in which displacements of the material particles are considered to be very small compared to the dimentions of the body under loading. Strain in a small strain setting can be written as
+\begin{equation}
+\epsilon_{ij}=\frac{1}{2}[u_{i,j}+u_{j,i}]
+\end{equation}
+where $ u_{i} $ are the displacements in the body
+
+
+\subsection{Weak Formulation}
+Consider a domain $\Omega$ with $\Gamma_u$ as prescribed displacements and $\Gamma_t$ as traction boundary conditions. The domain boundary can be represented as $\Gamma = \Gamma_u \cup \Gamma_t$ and $\Gamma_u \cap \Gamma_t = \Phi$
+By using the principle of virtual work the eq() can be written as
+\begin{equation}
+\delta W = \int_\Omega (\sigma_{ij,i} + b_j ) \delta u_j dV = 0
+\end{equation} 
+with,
+$u = u_o$ on $\Gamma_u$ (essential boundary condition) and
+$\sigma_{ij}n_j = \bar{t}_j$ on $\Gamma_t$ (natural boundary condition) \\*
+where $\delta u_j$ is the virtual displacement field, $n_j$ is unit normal to the surface \\*
+Applying integration by parts to the stress term under integral and by making using of conservation of angular momentum ($ \sigma_{ij} = \sigma_{ji} $) and Gauss divergence theorm (converting volume integral to surface integral) we approach at the following equation
+\begin{equation} \label{FinalWeakform}
+\delta W = \int_{\Omega} \sigma_{ij} \epsilon_{ij} d\Omega - \left[ \int_{\Gamma} \bar{t}_j \delta u_j d\Gamma_t  + \int_{\Omega} b_j \delta u_j d\Omega \right]
+\end{equation}
+as an additional requirement $\delta u_j$ must be zero at essential boundary conditions ($\Gamma_u$) for a unique solution.
+***Additional data regarding detailed explanation of steps to derive weak form can be included.
+
+
+\subsection{IGA Formulation}
+The advantage of IGA over FEM formulation lies in its basis functions incorporation and its ability to capture the exact geometry. While the FEM uses lagrangian basis functions, IGA uses NURBS basis functions which are used to generate the geometry itself. As discussed in the previous sections a multidimentional NURBS basis function is represented by $R_{i,j,k}^{p,q,r}(\xi,\eta,\zeta) \rightarrow R_i$. The isogeometric element  is represented by basis function $R_i$ and control points $P_i$ as
+\begin{equation}
+\textbf{x}^e = \sum_{i=1}^{n_{cp}^e} R_i P_i
+\end{equation} 
+By Galerkin approach, the displacements and virtual displacements are given by
+\begin{equation} \label{u_and_du}
+\textbf{u}^e = \sum_{i=1}^{n_{cp}^e} R_i \textbf{u}_i \qquad \delta\textbf{u}^e = \sum_{i=1}^{n_{cp}^e} R_i \delta\textbf{u}_i
+\end{equation}
+where $\textbf{u}_i$ and $\delta\textbf{u}_i$ are values at $i$th control point.
+The strain displacement matrix \textbf{B} is given by
+\begin{equation} \label{BMatrix}
+\textbf{B} =
+\begin{bmatrix}
+R_{1,x} & 0 & 0 & R_{2,x} & 0 & 0 & .... & R_{n_{cp}^e,x} & 0 & 0 \\
+0 &R_{1,y} & 0 & 0 & R_{2,y} & 0 & .... & 0 & R_{n_{cp}^e,y} & 0  \\
+0 & 0 & R_{1,z} &0 & 0 & R_{2,z} & .... &0 & 0 & R_{n_{cp}^e,z}  \\
+R_{1,y} & R_{1,x} & 0 & R_{2,y} & R_{2,x} & 0 & .... & R_{n_{cp}^e,y} & R_{n_{cp}^e,x} & 0 \\
+0 & R_{1,z} & R_{1,y} & 0 & R_{2,z} & R_{2,y} & .... & 0 & R_{n_{cp}^e,z} & R_{n_{cp}^e,y}\\
+R_{1,z} &0 & R_{1,x} & R_{2,z} &0 & R_{2,x} & .... &R_{n_{cp}^e,z} &0 &R_{n_{cp}^e,x}
+\end{bmatrix}
+\end{equation}
+By substituting Eqs, (\ref{u_and_du}) and (\ref{BMatrix}) in Eq.(\ref{FinalWeakform}) the weak form in matrix terms can be written as
+\begin{equation} \label{MatrixWeakForm}
+\sum_{e=1}^{nel} \left[ \left( \int_{\Omega_e} \textbf{B}^T \textbf{C} \textbf{B} d\Omega \right) \right] \textbf{u} = \int_{\Gamma^e_t} \textbf{R}.\textbf{t} d\Gamma + \int_{\Omega^e_t} \textbf{R}.\textbf{f} d\Omega 
+\end{equation}
+where \text{R} is defined as \\
+for the boundary $\Gamma^e$ 
+\begin{equation} \label{RMatrix1}
+\textbf{R} =
+\begin{bmatrix}
+R_1(\xi,\eta) & 0 & R_2(\xi,\eta) &0 & .... & R_{n_{cp}^e}(\xi,\eta) & 0 \\
+0 &R_1(\xi,\eta) & 0 & R_2(\xi,\eta) & .... & 0 & R_{n_{cp}^e}(\xi,\eta) \\
+\end{bmatrix}^T
+\end{equation}
+for the domain $\Omega^e$
+\begin{equation} \label{RMatrix2}
+\textbf{R} =
+\begin{bmatrix}
+R_1(\xi,\eta,\zeta) & 0 & R_2(\xi,\eta,\zeta) &0 & .... & R_{n_{cp}^e}(\xi,\eta,\zeta) & 0 \\
+0 &R_1(\xi,\eta,\zeta) & 0 & R_2(\xi,\eta,\zeta) & .... & 0 & R_{n_{cp}^e}(\xi,\eta,\zeta) \\
+\end{bmatrix}^T
+\end{equation}
+Eq.(\ref{MatrixWeakForm}) can be rewritten in a standard matrix form as
+\begin{equation}
+\sum_{e=1}^{nel} [\textbf{K}^e \textbf{U}^e = \textbf{F}^e] 
+\end{equation}
+where $\textbf{K}^e$ is isogeometric element’s stiffness matrix, $\textbf{U}^e$ is displacement vector and $\textbf{F}^e$ force vector
+
+
+
+
 \end{document}
