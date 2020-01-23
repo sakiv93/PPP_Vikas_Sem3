@@ -17,6 +17,7 @@
 \usepackage{etoolbox}
 \usepackage[nottoc]{tocbibind}
 \usepackage{tabu}
+\usepackage{enumitem,kantlipsum}
 \begin{document}
 	\begin{titlepage}
 		\centering
@@ -71,7 +72,7 @@ Isogeometric analysis (IGA) is a technique to generate geometry using CAD concep
 	\item[$\bullet$]   A huge amount of time involved in finite element modelling can be avoided.
 \end{description}
 
-\section{Non Uniform Rational B-Splines }
+\section{Non Uniform Rational B-Splines } \label{NURBS}
 NURBS are very often used in computer-aided design(CAD), manufacturing (CAM) and engineering (CAE) due to its flexibility to represent complex geometries. NURBS curves and surfaces are considered as the generalization of B-Spline and Bezier curves and surfaces. A NURBS curve is defined by its order, control points and knot vectors.
 
 \subsection{Order }
@@ -186,6 +187,24 @@ Eq.(\ref{MatrixWeakForm}) can be rewritten in a standard matrix form as
 \end{equation}
 where $\textbf{K}^e$ is isogeometric element’s stiffness matrix, $\textbf{U}^e$ is displacement vector and $\textbf{F}^e$ force vector
 
+
+\section{Implementation Procedure for IGA}
+This section describes step-by-step implementation of the Isogeometric analysis. A modified FEM code structure can be used to implement IGA. Similar to FEM, IGA can be divided into pre-processing, processing and post-processing stages. 
+
+
+\subsection{Pre-processing Stage of the Analysis}
+\subsubsection{Geometry Creation}
+As mentioned before in the section \ref{NURBS}, the construction of NURBS discretized geometry requires parametric details such as control points, knot vectors and the order of the NURBS curve. Commercial softwares like "Rhino" can be used to extract parametric details of the complex NURBS geometry. \\
+\subsubsection{Assembly arrays}
+Assembly arrays are required to assemble local discretized geometries to global geometry. For IGA as knot vector and control points defines the geometry two assembly arrays (1) Control point assembly array and (2) Knot vector connectivity array are required.
+\begin{enumerate}[leftmargin=*]
+\item Control point assembly array: \\
+The degree of the NURBS curve determines the number of control points ($n^e_{cp}$) present in an IGA element.
+Considering a three-dimensional element ($\Omega^e$)\\
+$n^e_{cp}$ = $(p+1)(q+1)(r+1)$ \\
+The details of the control points are stored row wise in assembly array.
+\item Knot vector connectivity array:
+\end{enumerate}
 
 
 
