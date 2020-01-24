@@ -140,7 +140,7 @@ as an additional requirement $\delta u_j$ must be zero at essential boundary con
 
 \subsection{IGA Formulation}
 The advantage of IGA over FEM formulation lies in its basis functions incorporation and its ability to capture the exact geometry. While the FEM uses lagrangian basis functions, IGA uses NURBS basis functions which are used to generate the geometry itself. As discussed in the previous sections a multidimentional NURBS basis function is represented by $R_{i,j,k}^{p,q,r}(\xi,\eta,\zeta) \rightarrow R_i$. The isogeometric element  is represented by basis function $R_i$ and control points $P_i$ as
-\begin{equation}
+\begin{equation} \label{Co-ordinate}
 \textbf{x}^e = \sum_{i=1}^{n_{cp}^e} R_i P_i
 \end{equation} 
 By Galerkin approach, the displacements and virtual displacements are given by
@@ -193,6 +193,7 @@ This section describes step-by-step implementation of the Isogeometric analysis.
 
 
 \subsection{Pre-processing Stage of the Analysis}
+This subsection mainly deals with NURBS based geometry creation, types of assembly arrays needed to assemble discretized geometries and how to deal with homogeneous and non-homogeneous boundary conditions on boundary defining control points due to their higher ($C^{p-1}$) continuity unlike $C^{0}$ continuity of FEM nodes.
 \subsubsection{Geometry Creation}
 As mentioned before in the section \ref{NURBS}, the construction of NURBS discretized geometry requires parametric details such as control points, knot vectors and the order of the NURBS curve. Commercial softwares like "Rhino" can be used to extract parametric details of the complex NURBS geometry. \\
 \subsubsection{Assembly arrays}
@@ -203,8 +204,96 @@ The degree of the NURBS curve determines the number of control points ($n^e_{cp}
 Considering a three-dimensional element ($\Omega^e$)\\
 $n^e_{cp}$ = $(p+1)(q+1)(r+1)$ \\
 The details of the control points are stored row wise in assembly array.
-\item Knot vector connectivity array:
+***This can be illustrated with an example below
+\item Knot vector connectivity array: \\
+The knot vector connectivity matrix is a row wise matrix with each row corresponds to respective element's knot spans. The columns corresponds to span ranges along $\xi, \eta$ and $\zeta$ directions.
+***This can be illustrated with an example below
 \end{enumerate}
+\subsubsection{Boundary Conditions}
+***Have to write 
+
+
+\subsection{Processing Stage of the Analysis}
+In the processing stage of analysis it is required to compute global elemental stiffness matrix and global force vector and solve these for the solution field. To formulate these matrices it requires NURBS basis functions and their derivatives evaluation. Numerical integration scheme like Gauss-Legendre rule is employed to solve the volume and area integrals involved in forming the stiffness matrix and internal force vector. Numerical integration involves mapping elements from physical space to master space (which is also called unit domain). As NURBS basis functions are defined in parametric space as given in Eq. ()it requires an additional mapping from physical space to parametric space ($\Omega_e \rightarrow \widetilde{\Omega_e}$). Later parametric space can be mapped on to master space (($\widetilde{\Omega_e} \rightarrow \overline{\Omega_e}$)). This procedure is illustrated in Fig.().
+
+
+\begin{enumerate}[leftmargin=*]
+\item Mapping from master space to parametric space: \\
+Consider a discretized IGA surface which is defined in parametric space $\widetilde{\Omega_e}=[\xi_i,\xi_{i+1}]\otimes[\eta_i,\eta_{i+1}]$, Refer Fig.(). The NURBS basis functions and their derivatives are evaluated at $\xi,\eta$ of the element $\widetilde{\Omega_e}$. These $\xi,\eta$ co-ordinate values are calculated by a linear mapping as shown below
+\begin{equation}
+\xi=\frac{1}{2}[(\xi_{i+1}-\xi_{i})\overline{\xi}+(\xi_{i+1}+\xi_{i})]
+\end{equation} 
+\begin{equation}
+\eta=\frac{1}{2}[(\eta_{i+1}-\eta_{i})\overline{\eta}+(\eta_{i+1}+\eta_{i})]
+\end{equation}
+where $\overline{\xi},\overline{\eta}$ are the integration points defined in master space \\
+$\textbf{J}_2$ matrix is defined as 
+\begin{equation}
+\textbf{J}_2 = \frac{\partial\xi}{\partial \bar{\xi}} \frac{\partial\eta}{\partial \bar{\eta}}
+\end{equation} 
+Determinant of $\textbf{J}_2$ matrix is required in numerical integration scheme for linear mapping 
+
+
+\item Mapping from physical space to parametric space: \\
+The Jacobian matrix $\textbf{J}_1$ used to map from physical space to parametric space ($\Omega_e \rightarrow \widetilde{\Omega_e}$) is computed as:
+
+\begin{equation} \label{J1Matrix1}
+\textbf{J}_1 =
+\large
+\begin{bmatrix}
+\frac{\partial x}{\partial \xi} &\frac{\partial x}{\partial \eta} \\
+\frac{\partial y}{\partial \xi} &\frac{\partial y}{\partial \eta} \\
+\end{bmatrix} 
+\end{equation}
+
+The components of the $\textbf{J}_1$ matrix are calculated using Eq. (\ref{Co-ordinate}).
+
+\begin{equation}
+\frac{\partial x}{\partial \xi} = \sum_{k=1}^{n_{cp}^e} \frac{\partial \textbf{R}_k}{\partial \xi} x_i
+\qquad
+\frac{\partial x}{\partial \eta} = \sum_{k=1}^{n_{cp}^e} \frac{\partial \textbf{R}_k}{\partial \eta} x_i
+\end{equation} 
+
+\begin{equation}
+\frac{\partial y}{\partial \xi} = \sum_{k=1}^{n_{cp}^e} \frac{\partial \textbf{R}_k}{\partial \xi} y_i
+\qquad
+\frac{\partial y}{\partial \eta} = \sum_{k=1}^{n_{cp}^e} \frac{\partial \textbf{R}_k}{\partial \eta} y_i
+\end{equation}
+
+\end{enumerate}
+The two different mappings described above can be illustrated with an example considering $ \textbf{F}(x,y)$ integrated over the physical space $\Omega$
+
+\begin{equation*}
+\begin{split}
+\int_{\Omega} \textbf{F}(x,y)d\Omega & = \sum_{e=1}^{nel} \int_{\Omega_e} \textbf{F}(x,y) d\Omega  \\
+ & = \sum_{e=1}^{nel} \int_{\widetilde{\Omega_e}} \textbf{F}(\xi,\eta)|\textbf{J}_1| d\xi d\eta \\
+ & = \sum_{e=1}^{nel} \int_{\overline{\Omega_e}} \textbf{F}(\overline\xi,\overline\eta)|\textbf{J}_1||\textbf{J}_2| d\overline\xi d\overline\eta  \\
+ & = \sum_{e=1}^{nel} \int_{-1}^{1} \int_{-1}^{1} \textbf{F}(\overline\xi,\overline\eta)|\textbf{J}_1||\textbf{J}_2| d\overline\xi d\overline\eta  \\
+ & = \sum_{e=1}^{nel} \left[ \sum_{i=1}^{n_{gp}^e} \textbf{F}(\overline\xi_i,\overline\eta_i) gw_i |\textbf{J}_1||\textbf{J}_2| d\overline\xi d\overline\eta \right]
+\end{split}
+\end{equation*}
+
+\noindent
+where $nel$ is the total number of elements and $n_{gp}^e$, $gw_i$ denotes the number of Gauss points and their respective Gauss weights.\\
+\noindent
+The formulated global stiffness matrix and force vector are solved using numerical scheme like Newton-Raphson method for the solution field.
+
+\subsection{Post-processing Stage of the Analysis}
+This section deals with visualization of the deformed geometry and how a displacement and stress fields are plotted. 
+
+\begin{enumerate}[leftmargin=*]
+\item Visualization of the deformed NURBS geometry:
+
+Visualization of the deformed geometry will be done in the same manner as the visualization of the initial geometry. After determining the displacement field at control points they are added to the initial control points co-ordinates $[\textbf{P}]$.\\
+\\
+$[\textbf{P}_{new}]=[\textbf{P}]+[\textbf{U}]$ \\
+\\
+$[\textbf{P}^{new}]$ control points array is used to plot the deformed geometry.
+
+\item Plotting of displacement and stress fields:
+
+\end{enumerate}
+
 
 
 
