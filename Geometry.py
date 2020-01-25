@@ -16,8 +16,8 @@ q=1 #Degree of the curve in y direction
 U = np.array([0., 0., 1.,1.])  #Knot vector in x direction
 V = np.array([0., 0., 1.,1.])  #Knot vector in y direction
 
-P_W=np.array([[[0,0,0,1],[1,0,0,1]],
-          [[0,1,0,1],[1,1,0,1]]])
+P_W=np.array([[[0,0,0,1],[10,0,0,1]],
+          [[0,10,0,1],[10,10,0,1]]])
 
 P_W_T = P_W.transpose((1,0,2))  #Here it is a 3D array (0,1,2) -- it is transposed to (1,0,2)
 # Input control point vector to element routine as a transpose #
@@ -46,3 +46,5 @@ ncp = ncpxi*ncpeta #Total number of control points
 #necp = (p+2)*(q+2) #Total number of control points per element
 nel=1
 necp=4 #Total number of control points per element
+
+Thick=1.0 #Thickness of the plate

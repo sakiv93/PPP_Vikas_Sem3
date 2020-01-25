@@ -21,7 +21,7 @@ nSteps = len(allTimes)
 
 #Initializing global Stress Tensor for values of stress at gauss points in each step
 #***** Have to Store values at each gauss point ******#
-global_sigma = np.zeros([nSteps,nel,3,1])
+#global_sigma = np.zeros([nSteps,nel,3,1])
 
 
 #loop for iterating load from 0% to 100%
@@ -31,10 +31,10 @@ for i in range(1):
     tau = 1
     u_g = U_g_0
     #***** Have to Store values at each gauss point ******#
-    current_sigma = np.zeros([nel,3,1])
+    #current_sigma = np.zeros([nel,3,1])
     
 #------------------DO Newton_Raphson_method----------------------------#
-    k=1
+    Newton=1
     while 1:
         #$$$$ Previously used Gauss points to plot strain  $$$$$$# 
         #gauss_loc = np.zeros(nElem)
@@ -59,7 +59,7 @@ for i in range(1):
             #print('Input Displacement matrix to element Routine:',u_e)
 
             #--------------------Calling Element Routine------------------------------#
-            K_e,F_e_int,F_e_ext,sigma,Electrical_Displacement = elementRoutine(u_e,tau)
+            K_e,F_e_int,F_e_ext,sigma,Electrical_Displacement,epsilon = elementRoutine(u_e,tau)
             #print(K_e)
             #print('u_e output from element routine:',u_e)
             #$$$$ Connectivity loop to connect K_e ,F_g_int, F_g_ext to global $$$$#
@@ -79,9 +79,12 @@ for i in range(1):
         # for solving the equations
         K_rg=np.delete(K_rg,BCS,axis=0) #axis=0 is row
         K_rg=np.delete(K_rg,BCS,axis=1) 
+        #print('K_rg',K_rg)
+        #print('G_global',G_global)
         reduced_G_global=G_global
         reduced_G_global=np.delete(reduced_G_global,BCS,axis=0)
         dU_g=np.matmul(np.linalg.inv(K_rg),-reduced_G_global)
+        #print('dU_g',dU_g)
 
         #-------For Newton Raphson Scheme covergence Criterion--------------#
         dU_g_convergence=dU_g
@@ -94,17 +97,19 @@ for i in range(1):
         #print('dU_g_insert',dU_g_insert)
         u_g=u_g+dU_g_insert
 
-        if (np.linalg.norm(reduced_G_global,np.inf)<0.005*np.linalg.norm(F_g_int,np.inf) or np.linalg.norm(dU_g_convergence,np.inf)<0.005*np.linalg.norm(u_g_convergence,np.inf)) or k > 5 :     
+        if (np.linalg.norm(reduced_G_global,np.inf)<0.005*np.linalg.norm(F_g_int,np.inf) or np.linalg.norm(dU_g_convergence,np.inf)<0.005*np.linalg.norm(u_g_convergence,np.inf) or Newton > 5) :     
             break
         else:
-            k=k+1
-    if k>5:
+            Newton=Newton+1
+    if Newton>5:
         print("Convergence criterion is not met, at load (peercentage):",tau*100)
         break
     else:
         U_g_0 = u_g
         #print('U For next Iteration:',U_g_0)
-        global_sigma[i] = current_sigma
-print(F_g_int)
-print(U_g_0)
-print(k)
+        #global_sigma[i] = current_sigma
+print('F_internal',F_g_int)
+print('Displacements',U_g_0)
+print(P)
+print('Sigma',sigma)
+print('Strain',epsilon)

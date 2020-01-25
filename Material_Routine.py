@@ -11,7 +11,6 @@ def materialRoutine(epsilon,electric_field, T_m):
     mu = youngs_modulus/(2*(1+poissons_ratio))
     lamda = (poissons_ratio*youngs_modulus)/((1+poissons_ratio)*(1-2*poissons_ratio))
     sigma_y = yield_stress
-    
     # Calculating Material tangent stiffness matrix
     Ct = np.array([[2*mu+lamda,lamda,0],[lamda,2*mu+lamda,0],[0,0,mu]])
     #print('Ct',Ct)

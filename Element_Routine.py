@@ -21,6 +21,8 @@ def Jacobian12(j,xi,eta,elU,elV):
 
     #--------Evaluation of NURBS Surface basis functions derivatives---------#
     Aders,wders = SurfaceDerivsAlgAuv(n,p,U,m,q,V,P,W,xi,eta,d)
+    #print('Aders:',Aders)
+    #print('wders:',wders)
     dRx = RatSurfaceDerivs(Aders,wders,d)
     dRx_dxi  =  dRx[1][0][0]
     dRx_deta =  dRx[0][1][0]
@@ -30,6 +32,7 @@ def Jacobian12(j,xi,eta,elU,elV):
                 [dRy_dxi,dRy_deta]])
     #print('J1 Matrix : ',J1)
     J1det = (dRx_dxi*dRy_deta)-(dRx_deta*dRy_dxi)
+    #print(J1det)
     #print('Determinat of J1 : ',J1det)
     J1inv = np.linalg.inv(J1)
     #print('J1inv : ',J1inv)
@@ -108,11 +111,15 @@ def elementRoutine(U_e, T_m):
     Fu_int_e=np.zeros((nudof*necp,1))
     Fe_int_e=np.zeros((nedof*necp,1))
     F_int_e=np.zeros(((nudof+nedof)*necp,1))
+    sigma_ig=np.zeros((np.shape(GPs_Ws)[0],3,1))
+    epsilon_ig=np.zeros((np.shape(GPs_Ws)[0],3,1))
     #F_ext_e=np.zeros(((nudof+nedof)*necp,1)
 
     #-----------Looping over gauss point-----------#
 
     for j in range(np.shape(GPs_Ws)[0]):
+        file=open('Random.txt','w')
+        file.write('Hello')
 
                 #$$$$$$$Have to decide where to place it$$$$$$$$$#
         elU = np.array([0,1]) #Manually defined have to generate using connectivity functions
@@ -141,11 +148,13 @@ def elementRoutine(U_e, T_m):
 
         epsilon = np.matmul(Bumatrix,U_u)
         electric_field = -np.matmul(Bematrix,U_phi)
+        epsilon_ig[j]=epsilon
         #print(epsilon)
         #------------------------- C Matrix--------------------------#
         #C=np.array([[2*MU+lamda,lamda,0],[lamda,2*MU+lamda,0],[0,0,MU]])
         #sigma = np.matmul(C,epsilon)
         C, e, k, sigma, Electrical_Displacement = materialRoutine(epsilon,electric_field, T_m)
+        sigma_ig[j] = sigma
         #print(C)
         #C=np.array([[139000,74280,0],[74280,115400,0],[0,0,115400]])
         #-------------------------Local Stiffness matrix Ke-------------------#
@@ -166,10 +175,10 @@ def elementRoutine(U_e, T_m):
         #$$$$ Have to add thickness of the plate $$$$$#
         #print('KEE:',K_EE)
 
-        K_MM = K_MM + BuCBu*J1det*J2det*wg
-        K_ME = K_ME + BueBe*J1det*J2det*wg
-        K_EM = K_EM + BeeBu*J1det*J2det*wg
-        K_EE = K_EE + BekBe*J1det*J2det*wg
+        K_MM = K_MM + BuCBu*J1det*J2det*wg*Thick
+        K_ME = K_ME + BueBe*J1det*J2det*wg*Thick
+        K_EM = K_EM + BeeBu*J1det*J2det*wg*Thick
+        K_EE = K_EE + BekBe*J1det*J2det*wg*Thick
         #print('KEE:',K_EE)
 
         #Arranging to Kt_e matrix 
@@ -183,8 +192,10 @@ def elementRoutine(U_e, T_m):
         #print('K_EE',Kt_e[8:12,8:12])
 
         #?????? Is this correct way of defining ??????#
-        Fu_int_e= Fu_int_e+np.matmul(np.transpose(Bumatrix),sigma)*J1det*J2det*wg
-        Fe_int_e= Fe_int_e+np.matmul(np.transpose(Bematrix),Electrical_Displacement)*J1det*J2det*wg
+        #print('Fu_int_e',Fu_int_e)
+        Fu_int_e= Fu_int_e+np.matmul(np.transpose(Bumatrix),sigma)*J1det*J2det*wg*Thick
+        Fe_int_e= Fe_int_e+np.matmul(np.transpose(Bematrix),Electrical_Displacement)*J1det*J2det*wg*Thick
+        #print('Fu_int_e',Fu_int_e)
         #print(Fe_int_e)
 
         #Arranging to F_int matrix 
@@ -199,7 +210,7 @@ def elementRoutine(U_e, T_m):
     #return Kt_e, F_int_e, F_ext_e,sigma
     #print('Stiffness_Matrix:',Kt_e)
     #print('Det of Stiffness_Matrix:',np.linalg.det(Kt_e))
-    return Kt_e, F_int_e, F_ext_e, sigma, Electrical_Displacement
+    return Kt_e, F_int_e, F_ext_e, sigma_ig, Electrical_Displacement,epsilon_ig
 
 
 #----------------Test case------------------#
