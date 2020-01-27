@@ -1,5 +1,5 @@
-#-------------------------------Displacement Driven----------------------------------------#
-#----------- Following code is working for Displacement Driven Coupling -------------------#
+#----------------------------------Displacement Driven------------------------------------------#
+#----------- Following code is working for Coupling with connectivity matrix in progress-------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -38,11 +38,14 @@ for i in range(1):
     while 1:
         #$$$$ Previously used Gauss points to plot strain  $$$$$$# 
         #gauss_loc = np.zeros(nElem)
-        Kt_g=np.zeros([(nudof+nedof)*necp,(nudof+nedof)*necp])
-        G_global=np.zeros(((nudof+nedof)*necp,1))
+########        Kt_g=np.zeros([(nudof+nedof)*necp,(nudof+nedof)*necp])
+        Kt_g=np.zeros([(nudof+nedof)*ncp,(nudof+nedof)*ncp])
+########        G_global=np.zeros(((nudof+nedof)*necp,1))
+        G_global=np.zeros(((nudof+nedof)*ncp,1))
 
         # First 8 rows are mechanical forces next 4 rows are electrical forces
-        F_g_int=np.zeros(((nudof+nedof)*necp,1))
+########        F_g_int=np.zeros(((nudof+nedof)*necp,1))
+        F_g_int=np.zeros(((nudof+nedof)*ncp,1))
 
 #---------------------------Connectivity loop------------------------------#
 #
@@ -51,11 +54,19 @@ for i in range(1):
 
         for j in range(nel):
 
-            #$$$$$$$$   Defined this in Element routine have to change to main program    $$$$$$$#
+            u_e_indices=ControlPointAssembly(n,p_ord,m,q_ord,nel)-1
+            u_e = u_g[u_e_indices]
+            #minus 1 since ControlPointAssembly control points numbering starts from 1
+            # and python indexing from zero.
 
-            elU = np.array([0,1]) #Manually defined have to generate using connectivity functions
-            elV = np.array([0,1])
-            u_e = u_g
+            #$$$$$$$$   Defined this in Element routine have to change to main program    $$$$$$$#
+            elU = Span_U[knotConnectivity[nel,0]]
+            elV = Span_U[knotConnectivity[nel,1]]
+
+
+########            elU = np.array([0,1]) #Manually defined have to generate using connectivity functions
+########            elV = np.array([0,1])
+########            u_e = u_g
             #print('Input Displacement matrix to element Routine:',u_e)
 
             #--------------------Calling Element Routine------------------------------#
@@ -63,9 +74,16 @@ for i in range(1):
             #print(K_e)
             #print('u_e output from element routine:',u_e)
             #$$$$ Connectivity loop to connect K_e ,F_g_int, F_g_ext to global $$$$#
+
+            # Indices for Force matrix
+            # 3 times because of 3 degrees of freedom
+            F_e_indices = np.concatenate((3*u_e_indices+0,3*u_e_indices+1,3*u_e_indices+2))
+            F_e_indices_sort = np.sort(F_e_indices)
+
             Kt_g = Kt_g+K_e
-            G_global = G_global+(F_e_int-F_e_ext)
-            F_g_int = F_g_int+F_e_int
+            G_global[F_e_indices_sort] = G_global[F_e_indices_sort]+(F_e_int-F_e_ext)
+########            F_g_int = F_g_int+F_e_int
+            F_g_int[F_e_indices_sort] = F_g_int[F_e_indices_sort]+F_e_int
 
             #$$$$ Previously used Gauss points to plot strain  $$$$$$# 
             #gauss_loc[j] = r_gp

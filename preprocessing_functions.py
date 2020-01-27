@@ -1,5 +1,5 @@
-#-------------------------------Displacement Driven----------------------------------------#
-#----------- Following code is working for Displacement Driven Coupling -------------------#
+#----------------------------------Displacement Driven------------------------------------------#
+#----------- Following code is working for Coupling with connectivity matrix in progress-------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -182,7 +182,7 @@ def SurfaceDerivsAlgAuv(n,p,U,m,q,V,P,W,u,v,d):
                 for s in range(q+1):
                     SKL_A[k][l] = SKL_A[k][l] + vnders[l][s]*temp_A[s]
                     SKL_W[k][l] = SKL_W[k][l] + vnders[l][s]*temp_W[s]
-    return SKL_A,SKL_W,
+    return SKL_A,SKL_W
 
 #---------------------Test case 1-----------------------------#
 
@@ -410,3 +410,40 @@ def NURBS_Surface_Point(n,p,U,m,q,V,Pw,u,v):
 # ax.set_zlabel('Z Label')
 
 #plt.show()
+
+#****** Algorithm from IGA Simplified paper ********#
+
+#***# Provide 1 order less for a 2 control point case
+
+#-----------------Inputs-----------------------#
+# n-no.of control points along xi direction
+# p_ord-order of basis function along xi direction
+# m-no.of control points along eta direction
+# q_ord-order of basis function along eta direction
+def ControlPointAssembly(n,p_ord,m,q_ord,ele_no):
+    nel= (n-p_ord)*(m-q_ord) 
+    ncp= n*m
+    necp = (p_ord+1)*(q_ord+1)
+    ControlPointAssemblyArray = np.zeros((necp,nel))
+
+    A=0
+    e=0
+    for j in range(1,m+1):
+        for i in range(1,n+1):
+            A=A+1
+            if (i>=(p_ord+1) and j>=(q_ord+1)):
+                e=e+1
+                for jloc in range(q_ord+1):
+                    for iloc in range(p_ord+1):
+                        B=A-jloc*n-iloc
+                        b=jloc*(p_ord+1)+iloc+1
+                        ControlPointAssemblyArray[b-1,e-1]=B
+    return np.flip(np.transpose(ControlPointAssemblyArray),axis=1) #To generate data in proper order
+
+
+# #----------------------------Test Case 2-----------------------------#
+# n=6
+# p_ord=3
+# m=4
+# q_ord=2
+# print(ControlPointAssembly(n,p_ord,m,q_ord))

@@ -1,5 +1,5 @@
-#-------------------------------Displacement Driven----------------------------------------#
-#----------- Following code is working for Displacement Driven Coupling -------------------#
+#----------------------------------Displacement Driven------------------------------------------#
+#----------- Following code is working for Coupling with connectivity matrix in progress-------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -30,10 +30,9 @@ def Jacobian12(j,xi,eta,elU,elV):
     dRy_deta =  dRx[0][1][1]
     J1 = np.array([[dRx_dxi,dRx_deta],
                 [dRy_dxi,dRy_deta]])
-    #print('J1 Matrix : ',J1)
+    print('J1 Matrix : ',J1)
     J1det = (dRx_dxi*dRy_deta)-(dRx_deta*dRy_dxi)
-    #print(J1det)
-    #print('Determinat of J1 : ',J1det)
+    print('Determinat of J1 : ',J1det)
     J1inv = np.linalg.inv(J1)
     #print('J1inv : ',J1inv)
     return J1det,J2det

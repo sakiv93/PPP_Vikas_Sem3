@@ -1,5 +1,5 @@
-#-------------------------------Displacement Driven----------------------------------------#
-#----------- Following code is working for Displacement Driven Coupling -------------------#
+#----------------------------------Displacement Driven------------------------------------------#
+#----------- Following code is working for Coupling with connectivity matrix in progress-------------------#
 import numpy as np
 
 yield_stress=210 #MPa
