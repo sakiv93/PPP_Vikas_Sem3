@@ -54,14 +54,30 @@ for i in range(1):
 
         for j in range(nel):
 
-            u_e_indices=ControlPointAssembly(n,p_ord,m,q_ord,nel)-1
+            #----- If p=1 or q=1 -------#
+            u_e_indices=ControlPointAssembly(ncpxi,p,ncpeta,q,nel)
+
+            # #----- If p>1 or q>1 -------#
+            # u_e_indices=ControlPointAssembly(ncpxi,p_ord,ncpeta,q_ord,nel)
+            print('u_e_indices',u_e_indices)
+
+
+            # Generated values of 'u_e_indices' are of float. 
+            # Converting to int for using for using it as indices of array
+            u_e_indices = u_e_indices.astype(int)
+            #u_e_indices = np.concatenate((2*u_e_indices+0,2*u_e_indices+1,(ncp*2)*u_e_indices))  
+            u_e_indices = np.concatenate((nudof*u_e_indices+0,nudof*u_e_indices+1,(ncp*nudof)+u_e_indices))
+            u_e_indices=np.sort(u_e_indices)
+            print('u_e_indices',u_e_indices)
             u_e = u_g[u_e_indices]
             #minus 1 since ControlPointAssembly control points numbering starts from 1
             # and python indexing from zero.
 
             #$$$$$$$$   Defined this in Element routine have to change to main program    $$$$$$$#
-            elU = Span_U[knotConnectivity[nel,0]]
-            elV = Span_U[knotConnectivity[nel,1]]
+            print('Knotconnectivity shape',np.shape(knotConnectivity))
+            print(knotConnectivity[0,0])
+            elU = Span_U[knotConnectivity[nel-1,0]]
+            elV = Span_V[knotConnectivity[nel-1,1]]
 
 
 ########            elU = np.array([0,1]) #Manually defined have to generate using connectivity functions
@@ -77,13 +93,17 @@ for i in range(1):
 
             # Indices for Force matrix
             # 3 times because of 3 degrees of freedom
-            F_e_indices = np.concatenate((3*u_e_indices+0,3*u_e_indices+1,3*u_e_indices+2))
-            F_e_indices_sort = np.sort(F_e_indices)
+            F_e_indices = u_e_indices #Already sorted
 
-            Kt_g = Kt_g+K_e
-            G_global[F_e_indices_sort] = G_global[F_e_indices_sort]+(F_e_int-F_e_ext)
+            #------------For loops to connect local stiffness matrix to global stiffness matrix------------#
+            for val1,index1 in enumerate(u_e_indices):
+                for val2,index2 in enumerate(u_e_indices):
+                    Kt_g[index1,index2] = Kt_g[index1,index2] +K_e[val1,val2]
+
+########            Kt_g = Kt_g+K_e
+            G_global[F_e_indices] = G_global[F_e_indices]+(F_e_int-F_e_ext)
 ########            F_g_int = F_g_int+F_e_int
-            F_g_int[F_e_indices_sort] = F_g_int[F_e_indices_sort]+F_e_int
+            F_g_int[F_e_indices] = F_g_int[F_e_indices]+F_e_int
 
             #$$$$ Previously used Gauss points to plot strain  $$$$$$# 
             #gauss_loc[j] = r_gp

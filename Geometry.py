@@ -16,12 +16,18 @@ q=1 #Degree of the curve in eta direction
 p_ord=p+1 #order of the curve in xi direction
 q_ord=q+1 #order of the curve in eta direction
 
-U = np.array([0.,0.,1.,2.,2.])  #Knot vector in x direction
-V = np.array([0.,0.,1.,2.,2.])  #Knot vector in y direction
+U = np.array([0.,0.,1.,1.])  #Knot vector in x direction
+V = np.array([0.,0.,1.,1.])  #Knot vector in y direction
 
-P_W=np.array([[[0,0,0,1],[5,0,0,1],[10,0,0,1]],
-          [[0,5,0,1],[5,5,0,1],[10,5,0,1]],
-          [[0,10,0,1],[5,10,0,1],[10,10,0,1]]])
+# U = np.array([0.,0.,1.,2.,2.])  #Knot vector in x direction
+# V = np.array([0.,0.,1.,2.,2.])  #Knot vector in y direction
+
+P_W=np.array([[[0,0,0,1],[10,0,0,1]],
+          [[0,10,0,1],[10,10,0,1]]])
+
+# P_W=np.array([[[0,0,0,1],[5,0,0,1],[10,0,0,1]],
+#           [[0,5,0,1],[5,5,0,1],[10,5,0,1]],
+#           [[0,10,0,1],[5,10,0,1],[10,10,0,1]]])
 
 P_W_T = P_W.transpose((1,0,2))  #Here it is a 3D array (0,1,2) -- it is transposed to (1,0,2)
 # Input control point vector to element routine as a transpose #
@@ -49,9 +55,18 @@ ncpeta=np.shape(P_W)[0] #No.of control points eta direction
 #nel=(ncpxi-p-1)*(ncpeta-q-1)
 ncp = ncpxi*ncpeta #Total number of control points
 #necp = (p+2)*(q+2) #Total number of control points per element
-#### nel=1
-nel= (ncpxi-p_ord)*(ncpeta-q_ord)
-necp= (p_ord+1)*(q_ord+1) #Total number of control points per element
+
+#----- If p=1 or q=1 -------#
+nel= (ncpxi-p)*(ncpeta-q)
+
+# #----- If p>1 or q>1 -------#
+# nel= (ncpxi-p_ord)*(ncpeta-q_ord)
+
+#----- If p=1 or q=1 -------#
+necp= (p+1)*(q+1) #Total number of control points per element
+
+# #----- If p>1 or q>1 -------#
+# necp= (p_ord+1)*(q_ord+1) #Total number of control points per element
 
 Thick=1.0 #Thickness of the plate
 
@@ -62,8 +77,16 @@ uniqueU = np.unique(U)
 uniqueV = np.unique(V)
 #print(np.unique(U))
 #print(np.unique(V))
-nelU = ncpxi-p_ord
-nelV = ncpeta-q_ord
+
+#----- If p=1 or q=1 -------#
+nelU = ncpxi-p
+nelV = ncpeta-q
+
+# #----- If p>1 or q>1 -------#
+# nelU = ncpxi-p_ord
+# nelV = ncpeta-q_ord
+
+
 nel = nelU*nelV
 knotConnectivity = np.zeros((nel,2)) 
 Span_U = np.zeros((nelU,2)) # Span_U have rows equal to number of elements in xi direction
@@ -77,3 +100,9 @@ for i in range(0,nelV):
         Span_U[j,:]= [uniqueU[j],uniqueU[j+1]]
         Span_V[i,:]= [uniqueV[i],uniqueV[i+1]]
         count=count+1
+knotConnectivity = knotConnectivity -1
+knotConnectivity = knotConnectivity.astype(int)
+
+print(Span_U)
+print(Span_V)
+print(knotConnectivity)
