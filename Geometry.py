@@ -16,25 +16,23 @@ q=1 #Degree of the curve in eta direction
 p_ord=p+1 #order of the curve in xi direction
 q_ord=q+1 #order of the curve in eta direction
 
-U = np.array([0.,0.,1.,1.])  #Knot vector in x direction
-V = np.array([0.,0.,1.,1.])  #Knot vector in y direction
+# U = np.array([0.,0.,1.,1.])  #Knot vector in x direction
+# V = np.array([0.,0.,1.,1.])  #Knot vector in y direction
 
-# U = np.array([0.,0.,1.,2.,2.])  #Knot vector in x direction
-# V = np.array([0.,0.,1.,2.,2.])  #Knot vector in y direction
+U = np.array([0.,0.,1.,2.,2.])  #Knot vector in x direction
+V = np.array([0.,0.,1.,2.,2.])  #Knot vector in y direction
 
-P_W=np.array([[[0,0,0,1],[10,0,0,1]],
-          [[0,10,0,1],[10,10,0,1]]])
+# P_W=np.array([[[0,0,0,1],[10,0,0,1]],    # Control points matrix along with their respective weights
+#           [[0,10,0,1],[10,10,0,1]]])     # in the fourth coloumn
 
-# P_W=np.array([[[0,0,0,1],[5,0,0,1],[10,0,0,1]],
-#           [[0,5,0,1],[5,5,0,1],[10,5,0,1]],
-#           [[0,10,0,1],[5,10,0,1],[10,10,0,1]]])
+P_W=np.array([[[0,0,0,1],[5,0,0,1],[10,0,0,1]],
+          [[0,5,0,1],[5,5,0,1],[10,5,0,1]],
+          [[0,10,0,1],[5,10,0,1],[10,10,0,1]]])
 
 P_W_T = P_W.transpose((1,0,2))  #Here it is a 3D array (0,1,2) -- it is transposed to (1,0,2)
 # Input control point vector to element routine as a transpose #
 # P_W=np.array([[[0,0,0,1],[0,1,0,1]],
 #             [[1,0,0,1],[1,1,0,1]]])
-
-
 
 
 d=1 #Derivatives need upto (k+l=d)
@@ -56,6 +54,18 @@ ncpeta=np.shape(P_W)[0] #No.of control points eta direction
 ncp = ncpxi*ncpeta #Total number of control points
 #necp = (p+2)*(q+2) #Total number of control points per element
 
+
+# if(p==1 and q==1):
+#     nel= (ncpxi-p)*(ncpeta-q)
+# elif(p==1):
+#     nel= (ncpxi-p)*(ncpeta-q_ord)
+# elif(q==1):
+#     nel= (ncpxi-p_ord)*(ncpeta-q)
+# else:
+#     nel= (ncpxi-p_ord)*(ncpeta-q_ord)
+
+# print(nel)
+
 #----- If p=1 or q=1 -------#
 nel= (ncpxi-p)*(ncpeta-q)
 
@@ -64,9 +74,13 @@ nel= (ncpxi-p)*(ncpeta-q)
 
 #----- If p=1 or q=1 -------#
 necp= (p+1)*(q+1) #Total number of control points per element
+necpxi  = (p+1)
+necpeta = (q+1)
 
 # #----- If p>1 or q>1 -------#
 # necp= (p_ord+1)*(q_ord+1) #Total number of control points per element
+# necpxi  = (p_ord+1)
+# necpeta = (q_ord+1)
 
 Thick=1.0 #Thickness of the plate
 
@@ -103,6 +117,6 @@ for i in range(0,nelV):
 knotConnectivity = knotConnectivity -1
 knotConnectivity = knotConnectivity.astype(int)
 
-print(Span_U)
-print(Span_V)
-print(knotConnectivity)
+# print(Span_U)
+# print(Span_V)
+# print(knotConnectivity)

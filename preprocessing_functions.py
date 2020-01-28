@@ -440,7 +440,7 @@ def ControlPointAssembly(n,p_ord,m,q_ord,ele_no):
                         ControlPointAssemblyArray[b-1,e-1]=B
     CP = np.flip(np.transpose(ControlPointAssemblyArray),axis=1)-1 #To generate data in proper order
     # -1 so that indices will start from '0'
-    return  CP[ele_no-1]
+    return  CP[ele_no]
     
 
 

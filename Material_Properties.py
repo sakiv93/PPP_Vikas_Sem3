@@ -12,7 +12,7 @@ poissons_ratio=0.30
 # e = np.array([[0,0,0],[-6.5e-6,23.3e-6,0]])  #Units C/mm^2
 # # Values Taken from Finite Element Modellingand Simulations paper
 
-e = np.array([[0,0,0],[-5.207e-6,15.08e-6,0]])  #Units C/mm^2
+e = np.array([[0,0,1.271e-5],[-5.207e-6,15.08e-6,0]])  #Units C/mm^2
 # Values taken from Userelement paper
 
 #---------------Dielectric material constants-----------------#

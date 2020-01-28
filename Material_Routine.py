@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#----------- Following code is working for Coupling with connectivity matrix in progress-------------------#
+#----------- Following code is working for Coupling with connectivity matrix in  progress-------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math

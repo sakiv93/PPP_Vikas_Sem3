@@ -32,7 +32,6 @@ def Jacobian12(j,xi,eta,elU,elV):
                 [dRy_dxi,dRy_deta]])
     print('J1 Matrix : ',J1)
     J1det = (dRx_dxi*dRy_deta)-(dRx_deta*dRy_dxi)
-    print('Determinat of J1 : ',J1det)
     J1inv = np.linalg.inv(J1)
     #print('J1inv : ',J1inv)
     return J1det,J2det
@@ -41,43 +40,64 @@ def B_matrix(xi,eta,Bu,Be):
 
     #---------------NURBS Basis Functions Derivatives wrt x and y-------------#
     uspan = FindSpan(n,p,xi,U)
+    print('uspan',uspan)
     vspan = FindSpan(m,q,eta,V)
+    print('vspan',vspan)
     # Indices of non vanishing basis functions
     NVu = np.arange(uspan-p,uspan+1,1) #Thoroughly checked. Can crosscheck again
+    print('NVu',NVu)
     NVv = np.arange(vspan-p,vspan+1,1)
+    print('NVv',NVv)
     Aders,wders = SurfaceDerivsAlgAuv(n,p,U,m,q,V,P,W,xi,eta,d)
     Denom = wders[0][0]
     Denom_du = wders[1][0]
     Denom_dv = wders[0][1]
-    dR_du = np.zeros((ncpxi,ncpeta))
-    dR_dv = np.zeros((ncpxi,ncpeta))
+    #***********Change this back again************************************************
+    # dR_du = np.zeros((ncpxi,ncpeta))
+    # dR_dv = np.zeros((ncpxi,ncpeta))
+    #***********************************************************
+
+    dR_du = np.zeros((necpxi,necpxi))
+    dR_dv = np.zeros((necpxi,necpxi))
     #---------------Loop over Non vanishing NURBS Basis Functions-------------#
     #***************Forgot to multiply with control points weights*************# Have to do it
     for ii, ii_value in enumerate(NVu):
         for jj, jj_value in enumerate(NVv):
             BFu = BasisFuns(uspan,xi,p,U)
+            print('BasisFuncsU',BFu)
             BFv = BasisFuns(vspan,eta,q,V)
+            print('BasisFuncsV',BFv)
             # Num = BFu[ii]*BFv[jj]
             Num = BFu[ii]*BFv[jj]**W[ii][jj]
+            print('Num',Num)
             DBFu = DersBasisFuns(uspan,xi,p,d,U)
             DBFv = DersBasisFuns(vspan,eta,q,d,V)
             Num_du = DBFu[1][ii]*BFv[jj]*W[ii][jj]
             Num_dv = BFu[ii]*DBFv[1][jj]*W[ii][jj]
             #Num_du = DBFu[1][ii]*BFv[jj]
             #Num_dv = BFu[ii]*DBFv[1][jj]
-            dR_du[ii_value][jj_value] = Num_du/Denom - Denom_du*Num/(Denom*Denom)
-            dR_dv[ii_value][jj_value] = Num_dv/Denom - Denom_dv*Num/(Denom*Denom)
+            #***********Change this back again************************************************
+            # dR_du[ii_value][jj_value] = Num_du/Denom - Denom_du*Num/(Denom*Denom)
+            # dR_dv[ii_value][jj_value] = Num_dv/Denom - Denom_dv*Num/(Denom*Denom)
+            #***********Change this back again************************************************
+            dR_du[ii][jj] = Num_du/Denom - Denom_du*Num/(Denom*Denom)
+            dR_dv[ii][jj] = Num_dv/Denom - Denom_dv*Num/(Denom*Denom)
+            print('dR_du',dR_du)
+            print('dR_dv',dR_dv)
     #---------Flatten (Convert 2D to 1D array) DervsNURBS Function------------#
     #dR_du(0,0)....dR_du(0,1),dR_du(1,0),.....dR_du(1,4).....dR_du(4,0),..........dR_du(4,4)
     #print(dR_du)
     #fdR_du = dR_du.flatten()
     fdR_du = (np.transpose(dR_du)).flatten() #************Cross check this******************#
+    print('fdR_du',fdR_du)
     #print(fdR_du)
     #fdR_dv = dR_dv.flatten()
     fdR_dv = (np.transpose(dR_dv)).flatten()
+    print('fdR_dv',fdR_dv)
     #print(fdR_dv)
     #-------------------------Bu Matrix --------------------------#
     for i2 in range(necp):
+        print('necp',necp)
         j1= 2*i2
         j2= 2*i2+1
         Bu[0,j1] = fdR_du[i2]
@@ -97,7 +117,8 @@ def B_matrix(xi,eta,Bu,Be):
 
 
 
-def elementRoutine(U_e, T_m):
+def elementRoutine(U_e,elU,elV,T_m):
+    print('Elu,Elv:',elU,elV)
     Bu=np.zeros((3,nudof*necp))
     Be=np.zeros((2,necp))
 
@@ -117,12 +138,10 @@ def elementRoutine(U_e, T_m):
     #-----------Looping over gauss point-----------#
 
     for j in range(np.shape(GPs_Ws)[0]):
-        file=open('Random.txt','w')
-        file.write('Hello')
 
                 #$$$$$$$Have to decide where to place it$$$$$$$$$#
-        elU = np.array([0,1]) #Manually defined have to generate using connectivity functions
-        elV = np.array([0,1]) #Manually defined have to generate using connectivity functions
+        #elU = np.array([0,1]) #Manually defined have to generate using connectivity functions
+        #elV = np.array([0,1]) #Manually defined have to generate using connectivity functions
 
         gp = GPs_Ws[j,0:2]
         wg = GPs_Ws[j,2]
@@ -134,25 +153,34 @@ def elementRoutine(U_e, T_m):
         #------Calculating J1 and J2 determinants-----------#
 
         J1det,J2det = Jacobian12(j,xi,eta,elU,elV)
+        print('Determinat of J1 : ',J1det)
+        print('Determinat of J2 : ',J2det)
+        print('Weight',wg)
 
         #-------------------------Bu Matrix --------------------------#
 
         Bumatrix,Bematrix = B_matrix(xi,eta,Bu,Be)
-        #print('Bu:',Bumatrix)
-        #print('Be:',Bematrix)
+        print('xi,eta',xi,eta)
+        print('Bu:',Bumatrix)
+        print('Be:',Bematrix)
 
         # U_u contains mechanical displcement from node 1 to 4, and U_phi contains electric potential from node 1 to 4
         U_u=U_e[0:8]
         U_phi = U_e[8:]
+        print('U_u',U_u)
+        print('U_phi',U_phi)
 
         epsilon = np.matmul(Bumatrix,U_u)
         electric_field = -np.matmul(Bematrix,U_phi)
         epsilon_ig[j]=epsilon
+        print('epsilon',epsilon)
+        print('electric_field',electric_field)
         #print(epsilon)
         #------------------------- C Matrix--------------------------#
         #C=np.array([[2*MU+lamda,lamda,0],[lamda,2*MU+lamda,0],[0,0,MU]])
         #sigma = np.matmul(C,epsilon)
         C, e, k, sigma, Electrical_Displacement = materialRoutine(epsilon,electric_field, T_m)
+        print('Sigma,ED',sigma,Electrical_Displacement)
         sigma_ig[j] = sigma
         #print(C)
         #C=np.array([[139000,74280,0],[74280,115400,0],[0,0,115400]])
@@ -185,10 +213,10 @@ def elementRoutine(U_e, T_m):
         Kt_e[0:8,8:12]  = K_ME
         Kt_e[8:12,0:8]  = K_EM
         Kt_e[8:12,8:12] = K_EE
-        #print('K_MM',Kt_e[0:8,0:8])
-        #print('K_ME',Kt_e[0:8,8:12])
-        #print('K_EM',Kt_e[8:12,0:8])
-        #print('K_EE',Kt_e[8:12,8:12])
+        print('K_MM',Kt_e[0:8,0:8])
+        print('K_ME',Kt_e[0:8,8:12])
+        print('K_EM',Kt_e[8:12,0:8])
+        print('K_EE',Kt_e[8:12,8:12])
 
         #?????? Is this correct way of defining ??????#
         #print('Fu_int_e',Fu_int_e)

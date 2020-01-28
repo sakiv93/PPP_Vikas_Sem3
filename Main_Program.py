@@ -36,6 +36,9 @@ for i in range(1):
 #------------------DO Newton_Raphson_method----------------------------#
     Newton=1
     while 1:
+        file=open('Random.txt','a+')
+        file.write('Newton Raphson iteration number:%d \n' % (Newton))
+        file.close()
         #$$$$ Previously used Gauss points to plot strain  $$$$$$# 
         #gauss_loc = np.zeros(nElem)
 ########        Kt_g=np.zeros([(nudof+nedof)*necp,(nudof+nedof)*necp])
@@ -53,13 +56,15 @@ for i in range(1):
 #--------------------------------------------------------------------------#
 
         for j in range(nel):
+            file=open('Random.txt','a+')
+            file.write('Element number:%d \n' % (j+1))
+            file.close()
 
             #----- If p=1 or q=1 -------#
-            u_e_indices=ControlPointAssembly(ncpxi,p,ncpeta,q,nel)
-
+            u_e_indices=ControlPointAssembly(ncpxi,p,ncpeta,q,j)
             # #----- If p>1 or q>1 -------#
             # u_e_indices=ControlPointAssembly(ncpxi,p_ord,ncpeta,q_ord,nel)
-            print('u_e_indices',u_e_indices)
+            #print('u_e_indices',u_e_indices)
 
 
             # Generated values of 'u_e_indices' are of float. 
@@ -68,17 +73,40 @@ for i in range(1):
             #u_e_indices = np.concatenate((2*u_e_indices+0,2*u_e_indices+1,(ncp*2)*u_e_indices))  
             u_e_indices = np.concatenate((nudof*u_e_indices+0,nudof*u_e_indices+1,(ncp*nudof)+u_e_indices))
             u_e_indices=np.sort(u_e_indices)
-            print('u_e_indices',u_e_indices)
+            #print('u_e_indices',u_e_indices)
+
+            with open('Random.txt', 'a+') as f:
+                f.write('Element %d indices:' % (j))
+                for item in u_e_indices:
+                    f.write("%s," % item)
+                f.write('\n')
+
             u_e = u_g[u_e_indices]
             #minus 1 since ControlPointAssembly control points numbering starts from 1
             # and python indexing from zero.
 
             #$$$$$$$$   Defined this in Element routine have to change to main program    $$$$$$$#
-            print('Knotconnectivity shape',np.shape(knotConnectivity))
-            print(knotConnectivity[0,0])
-            elU = Span_U[knotConnectivity[nel-1,0]]
-            elV = Span_V[knotConnectivity[nel-1,1]]
+            #print('Knotconnectivity shape',np.shape(knotConnectivity))
+            #print(knotConnectivity)
+            with open('Random.txt', 'a+') as f:
+                f.write('Knotconnectivity:')
+                for item in knotConnectivity[j-1]:
+                    f.write("%s," % item)
+                f.write('\n')
+            print('Span_U:',Span_U)
+            elU = Span_U[knotConnectivity[j,0]]
+            elV = Span_V[knotConnectivity[j,1]]
+            with open('Random.txt', 'a+') as f:
+                f.write('Span_U :')
+                for item in Span_U[knotConnectivity[j-1,0]]:
+                    f.write("%s," % item)
+                f.write('\n')
 
+            with open('Random.txt', 'a+') as f:
+                f.write('Span_V :')
+                for item in Span_V[knotConnectivity[j-1,1]]:
+                    f.write("%s," % item)
+                f.write('\n')
 
 ########            elU = np.array([0,1]) #Manually defined have to generate using connectivity functions
 ########            elV = np.array([0,1])
@@ -86,7 +114,7 @@ for i in range(1):
             #print('Input Displacement matrix to element Routine:',u_e)
 
             #--------------------Calling Element Routine------------------------------#
-            K_e,F_e_int,F_e_ext,sigma,Electrical_Displacement,epsilon = elementRoutine(u_e,tau)
+            K_e,F_e_int,F_e_ext,sigma,Electrical_Displacement,epsilon = elementRoutine(u_e,elU,elV,tau)
             #print(K_e)
             #print('u_e output from element routine:',u_e)
             #$$$$ Connectivity loop to connect K_e ,F_g_int, F_g_ext to global $$$$#
@@ -94,11 +122,13 @@ for i in range(1):
             # Indices for Force matrix
             # 3 times because of 3 degrees of freedom
             F_e_indices = u_e_indices #Already sorted
+            #print('K_e\n',K_e)
 
             #------------For loops to connect local stiffness matrix to global stiffness matrix------------#
             for val1,index1 in enumerate(u_e_indices):
                 for val2,index2 in enumerate(u_e_indices):
                     Kt_g[index1,index2] = Kt_g[index1,index2] +K_e[val1,val2]
+            #print('Kt_g\n',Kt_g)
 
 ########            Kt_g = Kt_g+K_e
             G_global[F_e_indices] = G_global[F_e_indices]+(F_e_int-F_e_ext)
@@ -119,6 +149,9 @@ for i in range(1):
         K_rg=np.delete(K_rg,BCS,axis=1) 
         #print('K_rg',K_rg)
         #print('G_global',G_global)
+        #print(BCS)
+        #print('K_rg',np.linalg.det(K_rg))
+        #print('K_rg',K_rg)
         reduced_G_global=G_global
         reduced_G_global=np.delete(reduced_G_global,BCS,axis=0)
         dU_g=np.matmul(np.linalg.inv(K_rg),-reduced_G_global)
@@ -151,3 +184,4 @@ print('Displacements',U_g_0)
 print(P)
 print('Sigma',sigma)
 print('Strain',epsilon)
+print('Displacements',U_g_0[[0,1,4,5,12,13,24,16,17,18,20,24,26]])
