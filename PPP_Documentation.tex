@@ -4,7 +4,7 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{graphicx}
-\usepackage{caption}
+\usepackage[center]{caption}
 \usepackage{mathtools}
 \usepackage{lipsum}
 \usepackage{stackengine}
@@ -18,6 +18,7 @@
 \usepackage[nottoc]{tocbibind}
 \usepackage{tabu}
 \usepackage{enumitem,kantlipsum}
+\usepackage{verbatim}
 \begin{document}
 	\begin{titlepage}
 		\centering
@@ -63,39 +64,181 @@
 	
 \section{Introduction}
 Among all the numerical methods Finite Element Methods (FEM) are more popularly used to find approximate solutions of partial differential equations. FEM approximates the Computer Aided Drawing (CAD) geometry by discretizing it into smaller geometries called elements. Such geometrical approximations may create numerical errors and seriously effect the accuracy of the solution.
-Isogeometric analysis (IGA) is a technique to generate geometry using CAD concept of Non Uniform Rational B-Splines and analyse using its basis functions. !The pioneers of this technique are Tom Hughes and his group at The University of Texas at Austin!.
+Isogeometric analysis (IGA) is a technique to generate geometry using CAD concept of Non Uniform Rational B-Splines (NURBS) and analyse using its basis functions. !The pioneers of this technique are Tom Hughes and his group at The University of Texas at Austin!.
 
 
 \subsection{Advantages of IGA over FEA}
-\begin{description}
+\begin{description}[leftmargin=*]
 	\item[$\bullet$]   The exact representation of the geometry for analysis rules out the possibility of geometrical approximations.
 	\item[$\bullet$]   A huge amount of time involved in finite element modelling can be avoided.
 \end{description}
 
-\section{Non Uniform Rational B-Splines } \label{NURBS}
-NURBS are very often used in computer-aided design(CAD), manufacturing (CAM) and engineering (CAE) due to its flexibility to represent complex geometries. NURBS curves and surfaces are considered as the generalization of B-Spline and Bezier curves and surfaces. A NURBS curve is defined by its order, control points and knot vectors.
-
+\section{B-Splines } \label{BSplines}
+In this section a brief description of B-Splines is discussed since NURBS is an extended version of B-Splines. A B-Spline basis function is defined by its order and knot vectors. A B-spline basis function along with control points defines a B-Spline curve.
 \subsection{Order }
-!The order of a NURBS curve defines the number of nearby control points that influence any given point on the curve. The curve is represented mathematically by a polynomial of degree one less than the order of the curve.(WIKI)! (Difference b/w degree and order)
-
-\subsection{Control points }
-!The control points determine the shape of the curve.[8] Typically, each point of the curve is computed by taking a weighted sum of a number of control points. The weight of each point varies according to the governing parameter. For a curve of degree d, the weight of any control point is only nonzero in d+1 intervals of the parameter space. Within those intervals, the weight changes according to a polynomial function (basis functions) of degree d. At the boundaries of the intervals, the basis functions go smoothly to zero, the smoothness being determined by the degree of the polynomial.(WIKI)!
+For a point on a B-Spline curve the order of the basis function speaks about the number of nearby control points influence the given point. The degree $p$ of the basis function is one less than the order of the curve.
 
 \subsection{Knot vector }
-The knot vector is a sequence of parameter values that determines where and how the control points affect the NURBS curve. The number of knots is always equal to the number of control points plus curve degree plus one (i.e. number of control points plus curve order). The knot vector divides the parametric space in the intervals mentioned before, usually referred to as knot spans. Each time the parameter value enters a new knot span, a new control point becomes active, while an old control point is discarded. It follows that the values in the knot vector should be in nondecreasing order, so (0, 0, 1, 2, 3, 3) is valid while (0, 0, 2, 1, 3, 3) is not.(WIKI)!
-\subsection{NURBS Curve and its properties }
+A knot vector is an array with an ascending order of parameter values written as $\Xi = \{ \xi_0,\xi_1,\xi_2.....,\xi_{n+p}\}$.
+!The knot vector is a sequence of parameter values that determines where and how the control points affect the NURBS curve. The number of knots is always equal to the number of control points plus curve degree plus one (i.e. number of control points plus curve order). The knot vector divides the parametric space in the intervals mentioned before, usually referred to as knot spans. Each time the parameter value enters a new knot span, a new control point becomes active, while an old control point is discarded. It follows that the values in the knot vector should be in nondecreasing order, so (0, 0, 1, 2, 3, 3) is valid while (0, 0, 2, 1, 3, 3) is not.(WIKI)!
+
+\subsection{Control points }
+!The control points determine the shape of the curve.[8] Typically, each point of the curve is computed by taking a weighted sum of a number of control points. The weight of each point varies according to the governing parameter. For a curve of degree d, the weight of any control point is only nonzero in d+1 intervals of the parameter space. Within those intervals, the weight changes according to a polynomial function (basis functions) of degree d. At the boundaries of the intervals, the basis functions go smoothly to zero, the smoothness being determined by the degree of the polynomial.(WIKI)! The total number of control points is given by $n_{cp}(\xi)$ = total number of knots in $[\Xi] - (p+1)$. *****
+
+
+
+\subsection{B-Spline basis functions }
+
+For a given Knot vector $\Xi$, the B-spline basis function for polynomial degree $\geq 1$ is defined by a recursive function
+
+\begin{equation}
+N_{i,p}(\xi) = \frac{\xi-\xi_{i}}{\xi_{i+p}-\xi_{i}} N_{i,p-1}(\xi) + 
+\frac{\xi_{i+p+1}-\xi}{\xi_{i+p+1}-\xi_{i+1}} N_{i+1,p-1}(\xi)
+\end{equation}
+
+\noindent
+with
+\begin{equation}
+ N_{i,0}(\xi) = 
+\begin{cases*}
+1 \quad& if $  \xi_{i} \leq \xi<\xi_{i+1} $ \\
+0 &  $ otherwise $ \\
+\end{cases*}
+\end{equation}
+
+\subsubsection{Properties }
+\begin{enumerate}
+\item $ N_{i,0}(\xi)$ is a step wise function with a value 1 over the half open interval $ \xi \in [\xi_{i}  \leq \xi<\xi_{i+1}) $ and zero on the rest.
+\item Basis functions sum upto to unity $\sum_{i=0}^{n} N_{i,p}(\xi) =1$
+\item Basis functions are non-negative $ N_{i,p}(\xi) \geq 0$ over the entire
+ domain
+\item********** Write more*********** 
+\end{enumerate}
+
+\subsubsection{Derivatives }
+The first derivative of a B-Spline basis function with its variable $\xi$ is given by
+
+\begin{equation}
+\frac{d}{d\xi}N_{i,p}(\xi) = \frac{p}{\xi_{i+p}-\xi_{i}} N_{i,p-1}(\xi) -
+\frac{p}{\xi_{i+p+1}-\xi_{i+1}} N_{i+1,p-1}(\xi)
+\end{equation}
+
+\noindent
+Higher order derivatives are not necessary for IGA formulation.
+
+\subsection{B-Spline curves}
+
+A $pth-degree$ B-Spline curve with a set of control points $P_i$ is given by
+\begin{equation}
+C(\xi) = \sum_{i=0}^{n} N_{i,p}(\xi) P_i \qquad \xi_0 \leq \xi \leq \xi_{n+p}
+\end{equation}
+
+\noindent
+defined on the knot vector $\Xi = \{ \xi_0,\xi_1,\xi_2.....,\xi_{n+p}\}$
+
+\subsection{B-Spline surfaces}
+A B-Spline surface $S(\xi,\eta)$ is built by tensor product between B-Spline curves along each parametric direction ($\xi,\eta$). It requires knot vectors ($\Xi = \{ \xi_0,\xi_1,\xi_2.....,\xi_{n+p}\}$,$H = \{\eta_0,\eta_1,\eta_2.....,\eta_{m+q}\}$) along each parametric direction and control net $P_{i,j}$
+
+
+\begin{equation} \label{BSplineSurface}
+S(\xi,\eta) = \sum_{i=0}^{n}\sum_{j=0}^{m} N_{i,p}(\xi) N_{j,q}(\eta) P_{i,j}
+\end{equation}
+
+\noindent
+where
+p,q are the degrees of the B-Spline basis functions along $\xi,\eta$ respectively and n,m are number of control points along $\xi,\eta$ respectively.
+\noindent
+Eq. (\ref{BSplineSurface}) can be compactly written as
+
+\begin{equation} \label{BSplineSurface}
+S(\xi,\eta) = \sum_{i=0}^{n}\sum_{j=0}^{m} N_{i,j}^{p,q}(\xi,\eta) P_{i,j}
+\end{equation}
+
+\subsubsection{Derivatives}
+
+The partial derivatives of bivariate B-Spline basis functions w.r.t parametric co-ordinates is given as
+
+\begin{equation} 
+\frac{\partial N_{i,j}^{p,q}(\xi,\eta)}{\partial \xi} = \frac{d}{d\xi} \bigg(N_{i,p}(\xi)\bigg)N_{j,q}(\eta) 
+\qquad
+\frac{\partial N_{i,j}^{p,q}(\xi,\eta)}{\partial \eta} = \frac{d}{d\eta} \bigg(N_{j,q}(\eta)\bigg)N_{i,p}(\xi)
+\end{equation}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Non Uniform Rational B-Splines } \label{NURBS}
+NURBS are very often used in computer-aided design(CAD), manufacturing (CAM) and engineering (CAE) due to its flexibility to represent complex geometries. NURBS curves and surfaces are considered as the generalization of B-Spline and Bezier curves and surfaces. A NURBS basis function is defined by its order and knot vector.
+
+\subsection{NURBS basis functions}
+NURBS basis functions $R_{i,p}(\xi)$ are defined as
+\begin{equation}
+R_{i,p}(\xi) = \frac{N_{i,p}(\xi)w_{i}}{\sum_{i=0}^{n}N_{i,p}(\xi)w_{i}}
+\end{equation}
+
+\noindent
+where $N_{i,p}(\xi)$ is the $i$th B-Spline basis function with order p and $w_{i}$ denotes weight of the $i$th control point ($P_i$). ***** Explain weights with help of an example****. When $w_{i} = constant \quad \forall i$ the NURBS basis function reduces to B-Spline basis function.
+\subsubsection{Derivatives}
+The first derivative of a NURBS basis function with its variable $\xi$ is given by
+
+\begin{equation}
+\frac{d }{d \xi} R_{i,p}(\xi) = \frac{N^{'}_{i,p}(\xi)  W(\xi) - N_{i,p}(\xi)  W^{'}(\xi)}{W^{2}(\xi)}w_{i}
+\end{equation}
+\noindent
+where
+$N^{'}_{i,p}(\xi) = \frac{d }{d \xi} N_{i,p}(\xi)$  \\
+\\
+\noindent
+and $W^{'}(\xi) =  \sum_{i=0}^{n}N^{'}_{i,p}(\xi) w_i$
+
+
+\subsection{NURBS Curves }
 The $p^{th}$ degree NURBS curve is given by
 
 \begin{equation}
-C(u) = \frac{\sum_{i=0}^{n}N_{i,p}(u)w_{i}P_{i}}{\sum_{i=0}^{n}N_{i,p}(u)w_{i}}
+C(\xi) = \frac{\sum_{i=0}^{n}N_{i,p}(\xi)w_{i}P_{i}}{\sum_{i=0}^{n}N_{i,p}(\xi)w_{i}}
+\qquad \xi_0 \leq \xi \leq \xi_{n+p}
+\end{equation}
+in short form
+\begin{equation}
+C(\xi) = \sum_{i=0}^{n}R_{i,p}(\xi)P_{i}
 \end{equation}
 refer NURBS book and write more info
-\subsection{NURBS Surface and Solids }
+\subsection{NURBS Surfaces and solids }
 NURBS Surfaces and solids are generated by the tensor product between NURBS curve basis functions.
-A NURBS surface with degree p in u direction and degree q in v direction is defined as
-\begin{equation}
-S(u) = \frac{\sum_{i=0}^{n}\sum_{j=0}^{m}N_{i,p}(u)N_{j,q}(v)w_{i,j}P_{i,j}}{\sum_{i=0}^{n}\sum_{j=0}^{m}N_{i,p}(u)N_{j,q}(v)w_{i,j}}
-\end{equation}
+\begin{enumerate}[leftmargin=*]
+	\item NURBS Surfaces: \\
+	A NURBS surface with degree $p$ in $\xi$ direction and degree $q$ in $\eta$ direction is defined as
+	\begin{equation}
+	S(\xi,\eta) = \sum_{i=0}^{n}\sum_{j=0}^{m} R_{i,j}^{p,q}(\xi,\eta)  P_{i,j}
+	\end{equation}
+	where the bivariate NURBS basis functions are given by
+	\begin{equation}
+	R_{i,j}^{p,q}(\xi,\eta)  = \frac{N_{i,p}(\xi)N_{j,q}(\eta)w_{i,j}}{\sum_{i=0}^{n}\sum_{j=0}^{m}N_{i,p}(\xi)N_{j,q}(\eta)w_{i,j}}
+	\end{equation}
+	\item NURBS Solids: \\
+	A NURBS solid with degree $p,q,k$ in $\xi$, $\eta$, $\zeta$ directions respectively is defined as
+	\begin{equation}
+	S(\xi,\eta,\zeta) = \sum_{i=0}^{n}\sum_{j=0}^{m}\sum_{k=0}^{l} R_{i,j,k}^{p,q,r}(\xi,\eta,\zeta)  P_{i,j,k}
+	\end{equation}
+	where the $R_{i,j,k}^{p,q,r}(\xi,\eta,\zeta)$ is given by
+	\begin{equation}
+	R_{i,j,k}^{p,q,r}(\xi,\eta,\zeta)  = \frac{N_{i,p}(\xi)N_{j,q}(\eta)N_{k,l}(\zeta)w_{i,j,k}}{\sum_{i=0}^{n}\sum_{j=0}^{m} \sum_{k=0}^{l} N_{i,p}(\xi)N_{j,q}(\eta)N_{k,r}(\zeta)w_{i,j,k}}
+	\end{equation}
+\end{enumerate}
+
+
 refer NURBS book and write more info
 
 \subsection{Derivatives of NURBS bivariate Basis Functions}
@@ -123,17 +266,16 @@ W^{'}_{\xi} = \sum_{i=0}^{n}\sum_{j=0}^{m}N^{'}_{i,p} N_{j,q}w_{i,j}
 \begin{equation}
 W^{'}_{\eta} = \sum_{i=0}^{n}\sum_{j=0}^{m}N_{i,p} N^{'}_{j,q}w_{i,j}
 \end{equation}
-
-\section{Iso-geometric analysis}
+The first partial derivatives of the trivariate basis functions can be computed in a similar manner as bivariate basis functions using a chain rule.
 
 
 
 \section{Implementation Procedure for IGA}
-This section describes step-by-step implementation of the Isogeometric analysis. A modified FEM code structure can be used to implement IGA. Similar to FEM, IGA can be divided into pre-processing, processing and post-processing stages. 
+This section describes step-by-step implementation of the Isogeometric analysis. A modified FEM code structure can be used to implement IGA. Similar to FEM, IGA can be divided into pre-processing, processing and post-processing stages. The stages in an IGA analysis is shown with the help of an flow chart (\ref{FlowChart1})
 
 
 \subsection{Pre-processing Stage of the Analysis}
-This subsection mainly deals with NURBS based geometry creation, types of assembly arrays needed to assemble discretized geometries and how to deal with homogeneous and non-homogeneous boundary conditions on boundary defining control points due to their higher ($C^{p-1}$) continuity unlike $C^{0}$ continuity of FEM nodes.
+This subsection mainly deals with NURBS based geometry creation, types of assembly arrays needed to assemble discretized geometries and how to deal with homogeneous and non-homogeneous boundary conditions on boundary defining control points due to their higher ($C^{p-1}$) continuity unlike $C^{0}$ continuity of FEM nodes. 
 \subsubsection{Geometry Creation}
 As mentioned before in the section \ref{NURBS}, the construction of NURBS discretized geometry requires parametric details such as control points, knot vectors and the order of the NURBS curve. Commercial softwares like "Rhino" can be used to extract parametric details of the complex NURBS geometry. \\
 \subsubsection{Assembly arrays}
@@ -154,7 +296,13 @@ Assembly arrays are required to assemble local discretized geometries to global 
 
 
 \subsection{Processing Stage of the Analysis}
-In the processing stage of analysis it is required to compute global elemental stiffness matrix and global force vector and solve these for the solution field. To formulate these matrices it requires NURBS basis functions and their derivatives evaluation. Numerical integration scheme like Gauss-Legendre rule is employed to solve the volume and area integrals involved in forming the stiffness matrix and internal force vector. Numerical integration involves mapping elements from physical space to master space (which is also called unit domain). As NURBS basis functions are defined in parametric space as given in Eq. ()it requires an additional mapping from physical space to parametric space ($\Omega_e \rightarrow \widetilde{\Omega_e}$). Later parametric space can be mapped on to master space (($\widetilde{\Omega_e} \rightarrow \overline{\Omega_e}$)). This procedure is illustrated in Fig.().
+In the processing stage of analysis it is required to compute global elemental stiffness matrix and global force vector and solve these for the solution field. To formulate these matrices it requires NURBS basis functions and their derivatives evaluation. Numerical integration scheme like Gauss-Legendre rule is employed to solve the volume and area integrals involved in forming the stiffness matrix and internal force vector. Numerical integration involves mapping elements from physical space to master space (which is also called unit domain). As NURBS basis functions are defined in parametric space as given in Eq. ()it requires an additional mapping from physical space to parametric space ($\Omega_e \rightarrow \widetilde{\Omega_e}$). Later parametric space can be mapped on to master space (($\widetilde{\Omega_e} \rightarrow \overline{\Omega_e}$)). This procedure is illustrated in Fig.(\ref{MasterPhysical}).
+\begin{figure}[H]
+	\begin{center}
+		\includegraphics[scale=0.3]{Physical_Master.png} 
+		\caption{\\Mapping IGA Physical element to Master element}\label{MasterPhysical}
+	\end{center}	
+\end{figure}
 
 
 \begin{enumerate}[leftmargin=*]
@@ -235,9 +383,10 @@ This section deals with visualization of the deformed geometry and how a displac
 	*** Have to write
 \end{enumerate}
 
-		\begin{figure}
+		\begin{figure}[H]
 	\begin{center}
-		\includegraphics[scale=0.7]{FlowChart_cropped.png}  
+		\includegraphics[scale=0.7]{FlowChart_cropped.png} 
+		\caption{\\Flow chart describing Pre-processing, Processing and Post-processing Stage of IGA}\label{FlowChart1}
 	\end{center}
 	
 \end{figure}
@@ -439,7 +588,7 @@ F_E = \int_\Omega \textbf{R}_e^T q d\Omega + \int_\Gamma \textbf{R}_e^T Q d\Gamm
 where \text{R} is defined as \\
 for the boundary $\Gamma$ 
 
-\begin{equation} \label{RMatrix1}
+\begin{equation} \label{RMatrix11}
 \textbf{R}_u =
 \begin{bmatrix}
 R_1(\xi,\eta) & 0 & R_2(\xi,\eta) &0 & .... & R_{n_{cp}^e}(\xi,\eta) & 0 \\
@@ -447,7 +596,7 @@ R_1(\xi,\eta) & 0 & R_2(\xi,\eta) &0 & .... & R_{n_{cp}^e}(\xi,\eta) & 0 \\
 \end{bmatrix}
 \end{equation}
 
-\begin{equation} \label{RMatrix1}
+\begin{equation} \label{RMatrix12}
 \textbf{R}_e =
 \begin{bmatrix}
 R_1(\xi,\eta) & R_2(\xi,\eta) & .... & R_{n_{cp}^e}(\xi,\eta) \\
@@ -457,7 +606,7 @@ R_1(\xi,\eta) & R_2(\xi,\eta) & .... & R_{n_{cp}^e}(\xi,\eta) \\
 \noindent
 for the domain $\Omega$
 
-\begin{equation} \label{RMatrix2}
+\begin{equation} \label{RMatrix21}
 \textbf{R}_u =
 \begin{bmatrix}
 R_1(\xi,\eta,\zeta) & 0 & R_2(\xi,\eta,\zeta) &0 & .... & R_{n_{cp}^e}(\xi,\eta,\zeta) & 0 \\
@@ -465,7 +614,7 @@ R_1(\xi,\eta,\zeta) & 0 & R_2(\xi,\eta,\zeta) &0 & .... & R_{n_{cp}^e}(\xi,\eta,
 \end{bmatrix}
 \end{equation}
 
-\begin{equation} \label{RMatrix2}
+\begin{equation} \label{RMatrix22}
 \textbf{R}_e =
 \begin{bmatrix}
 R_1(\xi,\eta,\zeta) & R_2(\xi,\eta,\zeta) & .... & R_{n_{cp}^e}(\xi,\eta,\zeta) \\
@@ -507,6 +656,110 @@ R_{1,z} & R_{2,z} & .... & R_{n_{cp}^e,z} \\
 \noindent
 Eq. (\ref{CoupledStiffnessMatrix}) can be solved using numerical methods like Newton Raphson scheme for displacements and potential solution field.
 
+\section{Problem Description and Implementation}
+
+\subsection{Problem statement}
+A 2D piezoelectric plate subjected to mechanical displacements and electrical loading is considered as shown in Figure(\ref{2Dplate}) . The material used is PZT4 and material properties are as follows
+
+$$
+C = \begin{bmatrix}
+139000 & 74280 & 77840 & 0 & 0 & 0\\
+47280 & 115400 & 74280 & 0 & 0 & 0\\
+77840 & 74280 & 139000 & 0 & 0 & 0\\
+0 & 0 & 0 & 25640 & 0 & 0\\
+0 & 0 & 0 & 0 & 25640 & 0\\
+0 & 0 & 0 & 0 & 0 & 25640\\
+\end{bmatrix} MPa
+$$  
+$$
+e = \begin{bmatrix}
+0 & -5.20710E-6 & 0 \\
+0 & 15.08E-6 & 0 \\
+0 & -5.207E-6 & 0\\
+12.710E-6 & 0 & 0 \\
+0 & 0 & 0 \\
+0 & 0 & 12.710E-6 \\
+\end{bmatrix} C/ mm`2
+$$
+$$
+\varepsilon = \begin{bmatrix}
+6.752E-12 & 0 & 0 \\
+0 & 5.872E-12 & 0 \\
+0 & 0 & 6.752E-12\\
+\end{bmatrix} C/(V mm)
+$$
+where \\
+C is Elastic constants, e is Piezoelectric constants and $\varepsilon$ being dielectric constants.
+
+\begin{figure}[H]
+	\begin{center}
+	\includegraphics[scale=0.3]{2DPlate.png} 
+	\caption{\\2D Piezoelectric plate}\label{2Dplate}
+	\end{center}	
+\end{figure}
+\subsection{Parametric details for the plate with single element}
+The 2nd order NURBS curve is used in both $\xi$ and $\eta$ directions. \\
+\begin{comment}
+The knot vectors along $\xi$ and $\eta$ directions are \\
+$\Xi= [0,0,1,1]$ and $\eta= [0,0,1,1]$. \\
+Control points along $\xi$ direction is given by \\
+$n_{cp}(\xi)$ = total number of knots in $[\Xi] - (p+1) = 2$.\\
+Similarly the total number of control points along $\eta$ direction is given by\\ $n_{cp}(\eta)$ = total number of knots in $[H ]- (q+1) = 2$ . \\
+The total number of control points which defines the surface is\\
+$n_{cp}$ = $n_{cp}(\xi) * n_{cp}(\eta)$ which is $2*2 = 4$. \\
+\end{comment}
+%\begin{verbatim}
+\begin{enumerate}
+\item Physical details for the geometry: \\
+	L = 10 \qquad \# Length of the plate in mm \\
+	H = 10 \qquad \# Height of the plate in mm \\
+
+\item Parametric details of the geometry: \\
+	$\Xi$ = [0,0,1,1] \qquad \# Knot vector in xi  direction \\
+	$H$ = [0,0,1,1] \qquad \# Knot vector in eta direction \\
+
+    Degree of the curve \\
+	p=1 \qquad \# Degree of the curve in $\xi$  direction \\
+	q=1 \qquad \# Degree of the curve in $\eta$ direction \\
+
+	Number of control points in each direction \\
+	$n_{cp}^{\xi}$  = len($\Xi$) - (p+1)  \qquad \#No.of control points in $\xi$ direction (4-(1+1) = 2) \\
+	$n_{cp}^{\eta}$ = len($H$) - (q+1)  \qquad \#No.of control points in $\eta$ direction (4-(1+1) = 2) \\
+
+\item Total number of control points for the geometry \\
+$n_{cp} = n_{cp}^{\xi} * n_{cp}^{\eta}$ = 2*2 = 4
+\begin{comment}
+\item Control points net for the geometry \\
+P = [[[0,0,0,1],[L,0,0,1]],
+[[0,L,0,1],[L,L,0,1]]]
+
+$$
+P = \begin{bmatrix}
+	[0,0,0,1] & [L,0,0,1] \\
+	[L,0,0,1] & [L,L,0,1] \\
+\end{bmatrix} 
+$$
+
+\end{enumerate}
+%\end{verbatim}
+\end{comment}
+\\
+The control points are given by
+\begin{center}
+	\begin{tabular}{ |c|c|c|c|c| } 
+		\hline
+		i & $ P_{i,0} $ & $ P_{i,1} $  \\ \hline
+		0 & $ (0,0,0,1) $ & $ (0,10,0,1) $  \\ \hline
+		1 & $ (10,0,0,1) $ & $ (10,10,0,1) $  \\ \hline
+
+	\end{tabular}
+\end{center}
+with fourth value in the paranthesis being weights of respective control points.
+As this is the case of single element there is no need for the control point assembly array and knot vector connectivity matrix.
+
+
+
+
 
 
 
@@ -514,4 +767,6 @@ Eq. (\ref{CoupledStiffnessMatrix}) can be solved using numerical methods like Ne
 
 \noindent
 %*** Remember References and citations ***
+\bibliographystyle{plain}
+\bibliography{References}
 \end{document}
