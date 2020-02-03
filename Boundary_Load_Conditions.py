@@ -1,54 +1,71 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#----------- Following code is working for Coupling with connectivity matrix in progress-------------------#
+#--------------------- Connectivity for a square elements is done-------------------------------#
 import numpy as np 
 import math
 from Geometry import *
 
-
 #Initializing global displcement vector
 U_g_0=np.zeros(((nudof+nedof)*ncp,1))
 
+#-------------Bottom nodes displacement y Dof----------------#
+Bottom_nodes_u = np.zeros(ncpxi)
+for BNu in range(ncpxi):
+    Bottom_nodes_u[BNu] =2*BNu+1
+Bottom_nodes_u= Bottom_nodes_u.astype(int)
+print(Bottom_nodes_u)
+
+#-------------Left nodes displacement x Dof------------------#
+Left_nodes_u = np.zeros(ncpeta)
+for LNu in range(ncpeta):
+    Left_nodes_u[LNu] = (ncpxi*2)*LNu
+Left_nodes_u= Left_nodes_u.astype(int)
+print(Left_nodes_u)
+
+#-------------Right nodes displacement x Dof------------------#
+Right_nodes_u = np.zeros(ncpeta)
+for RNu in range(ncpeta):
+    Right_nodes_u[RNu] = ((ncpxi*2)*RNu) + (ncpxi-1)*2
+Right_nodes_u= Right_nodes_u.astype(int)
+print(Right_nodes_u)
+
+#-------------Top nodes displacement y Dof----------------#
+Top_nodes_u = np.zeros(ncpxi)
+for TNu in range(ncpxi):
+    Top_nodes_u[TNu] =((ncpxi*2) * (ncpeta-1) + 1) + (TNu*2)
+Top_nodes_u= Top_nodes_u.astype(int)
+print(Top_nodes_u)
+
+#-------------Left nodes Electric Dof------------------#
+Left_nodes_e = np.zeros(ncpeta)
+for LNe in range(ncpeta):
+    Left_nodes_e[LNe] = ncpxi*ncpeta*2 + ncpxi*LNe
+Left_nodes_e= Left_nodes_e.astype(int)
+print(Left_nodes_e)
+
+#-------------Right nodes Electric Dof------------------#
+Right_nodes_e = np.zeros(ncpeta)
+for RNe in range(ncpeta):
+    Right_nodes_e[RNe] = (ncpxi*ncpeta*2 -1) + ncpxi*(RNe+1)
+Right_nodes_e= Right_nodes_e.astype(int)
+print(Right_nodes_e)
+
+#---------------------Boundary Conditions-------------------------#
+
 #-------------Displacement Loading-------------#
+U_g_0[Right_nodes_u]  = 0.1
+U_g_0[Top_nodes_u]    = 0.2
 
-#DispLoad1=[13,15,17]
-#DispLoad2=[2,6]
-
-#U_g_0[DispLoad1] = 0.1
-
-#U_g_0[2][0] = 0.1
-#U_g_0[5][0] = 0.1
-#U_g_0[6][0] = 0.1
-#U_g_0[7][0] = 0.1
-#-------------Boundary Conditions--------------#
 #---------------Displacement BCS---------------#
-DispBcsFixed=[0,1,3,5,6,12]
+U_g_0[Bottom_nodes_u] = 0
+U_g_0[Left_nodes_u]   = 0
 
-U_g_0[DispBcsFixed] = 0
-
-# U_g_0[0][0]     = 0
-# U_g_0[1][0]     = 0
-# U_g_0[3][0]     = 0
-# U_g_0[4][0]     = 0
 #----------------Electrical BCS----------------#
-ElecBcsFixed=[18,21,24]
-
-U_g_0[ElecBcsFixed] = 0
-
-# U_g_0[8][0]     = 0
-# U_g_0[10][0]    = 0
+U_g_0[Left_nodes_e]   = 0
 
 #----------------Electrical Loading----------------#
-
-ElecLoad = [20,23,26]
-U_g_0[ElecLoad] = 2e10
-
-#U_g_0[9][0]     = 0
-#U_g_0[11][0]    = 0
-
+#U_g_0[Right_nodes_e]  = 0
 
 #-------------Replace this every time-----------------------#
-BCS=np.sort(np.concatenate((DispBcsFixed,ElecBcsFixed,ElecLoad)))
-#BCS = [0,1,3,4,5,7,8,10]
-print(BCS)
-
-print(U_g_0)
+BCS=np.sort(np.concatenate((Right_nodes_u,Top_nodes_u,Bottom_nodes_u,Left_nodes_u,Left_nodes_e)))
+#print(BCS)
+#print(U_g_0)

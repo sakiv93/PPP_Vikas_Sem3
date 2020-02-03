@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#----------- Following code is working for Coupling with connectivity matrix in progress-------------------#
+#--------------------- Connectivity for a square elements is done-------------------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -7,10 +7,49 @@ from scipy import special
 from mpl_toolkits.mplot3d import Axes3D  
 np.set_printoptions(threshold=np.inf)
 
+#------------------------------------------------------------------------------------------------#
+#---------------Knot vector---------------#
+def KnotVector(degree,n_control_points):
+    """
+    Input: 
+        Input Degree of the NURBS curve (degree) 
+        and number of control points (n_control_points)
+    Process: 
+        Function calculates Knot vector array for given 
+        Degree and no.of Control points of NURBS Curve
+    Return: 
+        The function returns knot vector array
+    """
+    knot_vector = np.zeros((n_control_points-1)+(degree+1)+1)
+    for i in range ((n_control_points-1)+(degree+1)+1):
+        if i<(degree+1):
+            knot_vector[i]=0
+        elif (degree+1)<=i<=(n_control_points-1):
+            knot_vector[i]=i-(degree+1)+1
+        else:
+            knot_vector[i]=(n_control_points-1)-(degree+1)+2
+    return(knot_vector)
+#------------------------------------------------------------------------------------------------#
+
+
+#------------------------------------------------------------------------------------------------#
 #---------------Find Span---------------#
 # Adapted from alogorithm A2.1 in NURBS Book page no.68
 #Function to find knot span in Knot vector
+# Example:  If Knot vector = [0,0,1,2,3,4,5] and if u = 1.5 
+#           then knot span is 2 (i.e index of 1 in knot vector) since 1.5 lies between 1 and 2 
 def FindSpan(n_inp,degree_inp,u_inp,knot_vector_inp):
+    """
+    Input: 
+        Input [no.control points - (degree+1)] as (n_inp) 
+        degree of NURBS curve (degree_inp),
+        Parametric Co-ordinate(u_inp) on the curve
+        knot vector of the curve (knot_vector_inp)
+    Process: 
+        The function performs linear search for the knot span in knot vector
+    Return: 
+        The function returns the span of the parametric co-ordinate in the knot vector
+    """
     if (u_inp < knot_vector_inp[degree_inp+1]):
         return degree_inp
     else:
@@ -26,10 +65,10 @@ def FindSpan(n_inp,degree_inp,u_inp,knot_vector_inp):
 # n=highest_index-degree-1
 # knot_position = FindSpan(n,degree,3,knot_vector)
 # print(knot_position)
+#------------------------------------------------------------------------------------------------#
 
 
-
-
+#------------------------------------------------------------------------------------------------#
 #-----------------Basis Functions---------------#
 # Adapted from alogorithm A2.2 in NURBS Book page no.70
 #The output is stored in N[0],....N[p]
@@ -38,6 +77,22 @@ def FindSpan(n_inp,degree_inp,u_inp,knot_vector_inp):
 #we get N[i-p].........,N[i]
 # So if i is 3 then N[3] is stored in N[p] of the output matrix
 def BasisFuns(i,u,p,U):
+    """
+    Input: 
+        Input knot span (i) of parametric co-ordinate (u) on NURBS curve
+        Degree of the curve (p) and knot vector of the NURBS curve (U)
+
+    Process: 
+        The function find Non-zero basis function and also avoid 
+        the occurence of divide by zero
+        The output is stored in N[0],....N[p]
+        These are non zero functions in a given span
+        i is the span of the u value
+        we get N[i-p].........,N[i]
+        So if i is 3 then N[3] is stored in N[p] of the output matrix
+    Return: 
+        The function returns non zero basis functions for the given parametric co-ordinate
+    """
     N =np.zeros(p+1)
     N[0] = 1.0
     left =np.zeros(p+2)
@@ -66,6 +121,21 @@ def BasisFuns(i,u,p,U):
 # ders[k][j] is the kth derivative of function N_(i-p+j,p)
 # If k>p the derivatives are zero.
 def DersBasisFuns(i,u,p,m,U):
+    """
+    Input: 
+        Input knot span (i) of parametric co-ordinate (u) on NURBS curve
+        Degree of the curve (p), derivatives upto and including (m) th 
+        knot vector of the NURBS curve (U)
+
+    Process: 
+        The function finds Non-zero basis function and also their derivatives
+        Derivatives are stored in ders[k][j]
+        ders[k][j] is the kth derivative of function N_(i-p+j,p)
+        If k>p the derivatives are zero.
+    Return: 
+        The function returns non zero basis functions and their derivatives
+        upto and including mth derivative for the given parametric co-ordinate
+    """
     #Inititation of dimentions for 2D matrices
     ndu=np.zeros((p+1,p+1))
     ders=np.zeros((p+1,p+1))

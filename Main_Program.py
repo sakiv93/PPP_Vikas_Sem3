@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#----------- Following code is working for Coupling with connectivity matrix in progress-------------------#
+#--------------------- Connectivity for a square elements is done-------------------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -114,7 +114,7 @@ for i in range(1):
             #print('Input Displacement matrix to element Routine:',u_e)
 
             #--------------------Calling Element Routine------------------------------#
-            K_e,F_e_int,F_e_ext,sigma,Electrical_Displacement,epsilon = elementRoutine(u_e,elU,elV,tau)
+            K_e,F_e_int,F_e_ext,sigma,Electrical_Displacement,epsilon,electric_field = elementRoutine(u_e,elU,elV,tau)
             #print(K_e)
             #print('u_e output from element routine:',u_e)
             #$$$$ Connectivity loop to connect K_e ,F_g_int, F_g_ext to global $$$$#
@@ -184,4 +184,4 @@ print('Displacements',U_g_0)
 print(P)
 print('Sigma',sigma)
 print('Strain',epsilon)
-print('Displacements',U_g_0[[0,1,4,5,12,13,24,16,17,18,20,24,26]])
+#print('Displacements',U_g_0[[0,1,4,5,12,13,24,16,17,18,20,23,24,26]])

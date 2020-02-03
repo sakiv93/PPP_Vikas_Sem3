@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#----------- Following code is working for Coupling with connectivity matrix in progress-------------------#
+#--------------------- Connectivity for a square elements is done-------------------------------##
 import numpy as np
 
 yield_stress=210 #MPa

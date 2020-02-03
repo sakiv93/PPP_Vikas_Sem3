@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#----------- Following code is working for Coupling with connectivity matrix in progress-------------------#
+#--------------------- Connectivity for a square elements is done-------------------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -9,8 +9,18 @@ from Geometry import *
 from Material_Routine import *
 from preprocessing_functions import *
 
-def Jacobian12(j,xi,eta,elU,elV):
-
+def Jacobian12(xi,eta,elU,elV):
+    """
+    Input: 
+        Input Parametric Co-ordinates (xi,eta) of Gauss Points
+        ***Gauss Co-ordinates are defined in master space***
+        Knot span range (elU,elV) in xi and eta direction
+    Process: 
+        Inputs functions involving partial derivatives of NURBS Basis Functions
+        w.r.t to parametric co-ordinates and Calculates J1 matrix
+    Return: 
+        The function returns Determinant of J1 and J2 matrix
+    """
     #------------Calculating J1-------------------------#
 
     dxi_dximas = 0.5*(elU[1]-elU[0])
@@ -30,14 +40,27 @@ def Jacobian12(j,xi,eta,elU,elV):
     dRy_deta =  dRx[0][1][1]
     J1 = np.array([[dRx_dxi,dRx_deta],
                 [dRy_dxi,dRy_deta]])
-    print('J1 Matrix : ',J1)
+    #print('J1 Matrix : ',J1)
     J1det = (dRx_dxi*dRy_deta)-(dRx_deta*dRy_dxi)
     J1inv = np.linalg.inv(J1)
     #print('J1inv : ',J1inv)
     return J1det,J2det
 
-def B_matrix(xi,eta,Bu,Be):
+def B_matrix(xi,eta):
+    """
+    Input: 
+        Input Parametric Co-ordinates (xi,eta) of Gauss Points
+        ***Gauss Co-ordinates are defined in master space***
+    Process: 
+        Calls function to find derivatives of NURBS Basis functions
+        and Store the values in Bu matrix (B matrix related to mechanical case)
+        and Be matrix (B matrix related to electrical case)
+    Return: 
+        The function returns Bu matrix and Be matrix
+    """
 
+    Bu=np.zeros((3,nudof*necp))
+    Be=np.zeros((2,necp))
     #---------------NURBS Basis Functions Derivatives wrt x and y-------------#
     uspan = FindSpan(n,p,xi,U)
     print('uspan',uspan)
@@ -114,16 +137,26 @@ def B_matrix(xi,eta,Bu,Be):
         Be[1,i2] = fdR_dv[i2]
     return Bu,Be
 
-
-
-
 def elementRoutine(U_e,elU,elV,T_m):
+    """
+    Input: 
+        Input (U_e) matrix which contain DOF values 
+        Knot span range (elU,elV) in xi and eta direction
+    Process: 
+        The element routine takes in information about the element 
+        and loops over gauss points and perform numerical integration
+        to find the values of Internal and External force matrix,
+        Elemental stiffness matrix.
+    Return: 
+        The function returns Elemental Stiffness matrix (Kt_e), 
+        Internal and External elemental force matrix, 
+        Stress,Strain,Electric field and Electric displacements at Gauss points
+    """
     print('Elu,Elv:',elU,elV)
-    Bu=np.zeros((3,nudof*necp))
-    Be=np.zeros((2,necp))
+    #Bu=np.zeros((3,nudof*necp))
+    #Be=np.zeros((2,necp))
 
     Kt_e = np.zeros(((nudof+nedof)*necp,(nudof+nedof)*necp))
-
     K_MM=np.zeros((nudof*necp,nudof*necp))
     K_ME=np.zeros((nudof*necp,nedof*necp))
     K_EM=np.zeros((nedof*necp,nudof*necp))
@@ -133,33 +166,31 @@ def elementRoutine(U_e,elU,elV,T_m):
     F_int_e=np.zeros(((nudof+nedof)*necp,1))
     sigma_ig=np.zeros((np.shape(GPs_Ws)[0],3,1))
     epsilon_ig=np.zeros((np.shape(GPs_Ws)[0],3,1))
+    electric_field_ig = np.zeros((np.shape(GPs_Ws)[0],2,1))
+    Electrical_Displacement_ig = np.zeros((np.shape(GPs_Ws)[0],2,1))
     #F_ext_e=np.zeros(((nudof+nedof)*necp,1)
 
     #-----------Looping over gauss point-----------#
 
     for j in range(np.shape(GPs_Ws)[0]):
 
-                #$$$$$$$Have to decide where to place it$$$$$$$$$#
-        #elU = np.array([0,1]) #Manually defined have to generate using connectivity functions
-        #elV = np.array([0,1]) #Manually defined have to generate using connectivity functions
-
         gp = GPs_Ws[j,0:2]
         wg = GPs_Ws[j,2]
         ximas = gp[0]  #Gauss points in Master space
-        etamas = gp[1]
-        xi = 0.5*((elU[1]-elU[0])*ximas + (elU[1]+elU[0]))     #Paramteric co-ordinates
-        eta = 0.5*((elV[1]-elV[0])*etamas + (elV[1]+elV[0]))
+        etamas = gp[1] #Gauss points in Master space
+        xi = 0.5*((elU[1]-elU[0])*ximas + (elU[1]+elU[0]))     #Gauss points in Parametric space
+        eta = 0.5*((elV[1]-elV[0])*etamas + (elV[1]+elV[0]))   #Gauss points in Parametric space
 
         #------Calculating J1 and J2 determinants-----------#
 
-        J1det,J2det = Jacobian12(j,xi,eta,elU,elV)
+        J1det,J2det = Jacobian12(xi,eta,elU,elV)
         print('Determinat of J1 : ',J1det)
         print('Determinat of J2 : ',J2det)
         print('Weight',wg)
 
-        #-------------------------Bu Matrix --------------------------#
+        #-------------------------Bu and Be Matrix --------------------------#
 
-        Bumatrix,Bematrix = B_matrix(xi,eta,Bu,Be)
+        Bumatrix,Bematrix = B_matrix(xi,eta)
         print('xi,eta',xi,eta)
         print('Bu:',Bumatrix)
         print('Be:',Bematrix)
@@ -170,20 +201,17 @@ def elementRoutine(U_e,elU,elV,T_m):
         print('U_u',U_u)
         print('U_phi',U_phi)
 
-        epsilon = np.matmul(Bumatrix,U_u)
-        electric_field = -np.matmul(Bematrix,U_phi)
-        epsilon_ig[j]=epsilon
+        epsilon = np.matmul(Bumatrix,U_u)               # Strain
+        electric_field = -np.matmul(Bematrix,U_phi)     # Electric_field
+        epsilon_ig[j]=epsilon                   #Storing value of Strain at each gauss point
+        electric_field_ig[j] = electric_field   #Storing value of electric_field at each gauss point
         print('epsilon',epsilon)
         print('electric_field',electric_field)
-        #print(epsilon)
-        #------------------------- C Matrix--------------------------#
-        #C=np.array([[2*MU+lamda,lamda,0],[lamda,2*MU+lamda,0],[0,0,MU]])
-        #sigma = np.matmul(C,epsilon)
+
         C, e, k, sigma, Electrical_Displacement = materialRoutine(epsilon,electric_field, T_m)
         print('Sigma,ED',sigma,Electrical_Displacement)
         sigma_ig[j] = sigma
-        #print(C)
-        #C=np.array([[139000,74280,0],[74280,115400,0],[0,0,115400]])
+        Electrical_Displacement_ig[j] = Electrical_Displacement
         #-------------------------Local Stiffness matrix Ke-------------------#
         CBu=np.matmul(C,Bumatrix)
         BuCBu = np.matmul(np.transpose(Bumatrix),CBu)
@@ -198,9 +226,6 @@ def elementRoutine(U_e,elU,elV,T_m):
         BekBe = -np.matmul(np.transpose(Bematrix),kBe)
 
         #------------------Numerical Integration-----------------------#
-
-        #$$$$ Have to add thickness of the plate $$$$$#
-        #print('KEE:',K_EE)
 
         K_MM = K_MM + BuCBu*J1det*J2det*wg*Thick
         K_ME = K_ME + BueBe*J1det*J2det*wg*Thick
@@ -218,26 +243,16 @@ def elementRoutine(U_e,elU,elV,T_m):
         print('K_EM',Kt_e[8:12,0:8])
         print('K_EE',Kt_e[8:12,8:12])
 
-        #?????? Is this correct way of defining ??????#
-        #print('Fu_int_e',Fu_int_e)
         Fu_int_e= Fu_int_e+np.matmul(np.transpose(Bumatrix),sigma)*J1det*J2det*wg*Thick
         Fe_int_e= Fe_int_e+np.matmul(np.transpose(Bematrix),Electrical_Displacement)*J1det*J2det*wg*Thick
-        #print('Fu_int_e',Fu_int_e)
-        #print(Fe_int_e)
 
         #Arranging to F_int matrix 
         F_int_e[0:nudof*necp] = Fu_int_e                              # 0 1 2 3 4 5 6 7
         F_int_e[nudof*necp:(nudof*necp+nedof*necp)] = Fe_int_e        # 8 9 10 11
-        #print('Fu_int_e',Fu_int_e)
-        #print('Fe_int_e',Fe_int_e)
-        #print('F_int_e',F_int_e)
         F_ext_e = np.zeros_like(F_int_e)    
 
     #$$$$$     Didnt return gauss points co-ordinates     $$$$$#    
-    #return Kt_e, F_int_e, F_ext_e,sigma
-    #print('Stiffness_Matrix:',Kt_e)
-    #print('Det of Stiffness_Matrix:',np.linalg.det(Kt_e))
-    return Kt_e, F_int_e, F_ext_e, sigma_ig, Electrical_Displacement,epsilon_ig
+    return Kt_e, F_int_e, F_ext_e, sigma_ig, Electrical_Displacement_ig,epsilon_ig,electric_field_ig
 
 
 #----------------Test case------------------#
