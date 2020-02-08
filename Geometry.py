@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#--------------------- Connectivity for a square elements is done-------------------------------#
+#---------------------------Connectivity of elements is done------------------------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math

@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#--------------------- Connectivity for a square elements is done-------------------------------#
+#---------------------------Connectivity of elements is done------------------------------------#
 import numpy as np 
 import math
 from Geometry import *
@@ -63,9 +63,9 @@ U_g_0[Left_nodes_u]   = 0
 U_g_0[Left_nodes_e]   = 0
 
 #----------------Electrical Loading----------------#
-#U_g_0[Right_nodes_e]  = 0
+#U_g_0[Right_nodes_e]  = 1000
 
 #-------------Replace this every time-----------------------#
-BCS=np.sort(np.concatenate((Right_nodes_u,Top_nodes_u,Bottom_nodes_u,Left_nodes_u,Left_nodes_e)))
+BCS=np.sort(np.concatenate((Right_nodes_u,Top_nodes_u,Bottom_nodes_u,Left_nodes_u,Left_nodes_e,)))
 #print(BCS)
 #print(U_g_0)

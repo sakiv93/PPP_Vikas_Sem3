@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#--------------------- Connectivity for a square elements is done-------------------------------#
+#---------------------------Connectivity of elements is done------------------------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -34,19 +34,21 @@ def Jacobian12(xi,eta,elU,elV):
     #print('Aders:',Aders)
     #print('wders:',wders)
     dRx = RatSurfaceDerivs(Aders,wders,d)
+    #print('dRx',dRx)
     dRx_dxi  =  dRx[1][0][0]
     dRx_deta =  dRx[0][1][0]
     dRy_dxi  =  dRx[1][0][1]
     dRy_deta =  dRx[0][1][1]
+    print('dRx',dRx[1][0][0],dRx[0][1][0],dRx[1][0][1],dRx[0][1][1])
     J1 = np.array([[dRx_dxi,dRx_deta],
                 [dRy_dxi,dRy_deta]])
     #print('J1 Matrix : ',J1)
     J1det = (dRx_dxi*dRy_deta)-(dRx_deta*dRy_dxi)
     J1inv = np.linalg.inv(J1)
     #print('J1inv : ',J1inv)
-    return J1det,J2det
+    return J1,J1det,J2det
 
-def B_matrix(xi,eta):
+def B_matrix(xi,eta,J1):
     """
     Input: 
         Input Parametric Co-ordinates (xi,eta) of Gauss Points
@@ -80,8 +82,8 @@ def B_matrix(xi,eta):
     # dR_dv = np.zeros((ncpxi,ncpeta))
     #***********************************************************
 
-    dR_du = np.zeros((necpxi,necpxi))
-    dR_dv = np.zeros((necpxi,necpxi))
+    dR_dx = np.zeros((necpxi,necpxi))
+    dR_dy = np.zeros((necpxi,necpxi))
     #---------------Loop over Non vanishing NURBS Basis Functions-------------#
     #***************Forgot to multiply with control points weights*************# Have to do it
     for ii, ii_value in enumerate(NVu):
@@ -103,38 +105,55 @@ def B_matrix(xi,eta):
             # dR_du[ii_value][jj_value] = Num_du/Denom - Denom_du*Num/(Denom*Denom)
             # dR_dv[ii_value][jj_value] = Num_dv/Denom - Denom_dv*Num/(Denom*Denom)
             #***********Change this back again************************************************
-            dR_du[ii][jj] = Num_du/Denom - Denom_du*Num/(Denom*Denom)
-            dR_dv[ii][jj] = Num_dv/Denom - Denom_dv*Num/(Denom*Denom)
-            print('dR_du',dR_du)
-            print('dR_dv',dR_dv)
+            dR_dxi = Num_du/Denom - Denom_du*Num/(Denom*Denom)
+            dR_deta = Num_dv/Denom - Denom_dv*Num/(Denom*Denom) 
+
+            dR_dxi_dR_deta = np.array([dR_dxi,dR_deta])
+            print('dR_dxi_dR_deta',dR_dxi_dR_deta)
+            dR_dx_dR_dy = np.matmul(np.linalg.inv(J1),dR_dxi_dR_deta)
+            print('dR_dx_dR_dy',dR_dx_dR_dy)
+            dR_dx[ii][jj] = dR_dx_dR_dy[0]
+            dR_dy[ii][jj] = dR_dx_dR_dy[1]
+            
+            # dR_dxi[ii][jj] = Num_du/Denom - Denom_du*Num/(Denom*Denom)
+            # dR_deta[ii][jj] = Num_dv/Denom - Denom_dv*Num/(Denom*Denom)
+            print('dR_du',dR_dx[ii][jj])
+            print('dR_dv',dR_dy[ii][jj])
+    #-------------Have to multiply dR_du / dR_dv matrix with jacobian matrix-------------------#
+
+
+
+
+
+
     #---------Flatten (Convert 2D to 1D array) DervsNURBS Function------------#
     #dR_du(0,0)....dR_du(0,1),dR_du(1,0),.....dR_du(1,4).....dR_du(4,0),..........dR_du(4,4)
     #print(dR_du)
     #fdR_du = dR_du.flatten()
-    fdR_du = (np.transpose(dR_du)).flatten() #************Cross check this******************#
-    print('fdR_du',fdR_du)
+    fdR_dx = (np.transpose(dR_dx)).flatten() #************Cross check this******************#
+    print('fdR_dx',fdR_dx)
     #print(fdR_du)
     #fdR_dv = dR_dv.flatten()
-    fdR_dv = (np.transpose(dR_dv)).flatten()
-    print('fdR_dv',fdR_dv)
+    fdR_dy = (np.transpose(dR_dy)).flatten()
+    print('fdR_dv',fdR_dy)
     #print(fdR_dv)
     #-------------------------Bu Matrix --------------------------#
     for i2 in range(necp):
         print('necp',necp)
         j1= 2*i2
         j2= 2*i2+1
-        Bu[0,j1] = fdR_du[i2]
+        Bu[0,j1] = fdR_dx[i2]
         #print(j1,j2)
         #print(Bu[0,j1])
-        Bu[1,j2] = fdR_dv[i2]
+        Bu[1,j2] = fdR_dy[i2]
         #print(Bu[1,j2])
-        Bu[2,j1] = fdR_dv[i2]
+        Bu[2,j1] = fdR_dy[i2]
         #print(Bu[2,j1])
-        Bu[2,j2] = fdR_du[i2]
+        Bu[2,j2] = fdR_dx[i2]
         #print(Bu[2,j2])
 
-        Be[0,i2] = fdR_du[i2]
-        Be[1,i2] = fdR_dv[i2]
+        Be[0,i2] = fdR_dx[i2]
+        Be[1,i2] = fdR_dy[i2]
     return Bu,Be
 
 def elementRoutine(U_e,elU,elV,T_m):
@@ -183,14 +202,14 @@ def elementRoutine(U_e,elU,elV,T_m):
 
         #------Calculating J1 and J2 determinants-----------#
 
-        J1det,J2det = Jacobian12(xi,eta,elU,elV)
+        J1,J1det,J2det = Jacobian12(xi,eta,elU,elV)
         print('Determinat of J1 : ',J1det)
         print('Determinat of J2 : ',J2det)
         print('Weight',wg)
 
         #-------------------------Bu and Be Matrix --------------------------#
 
-        Bumatrix,Bematrix = B_matrix(xi,eta)
+        Bumatrix,Bematrix = B_matrix(xi,eta,J1)
         print('xi,eta',xi,eta)
         print('Bu:',Bumatrix)
         print('Be:',Bematrix)

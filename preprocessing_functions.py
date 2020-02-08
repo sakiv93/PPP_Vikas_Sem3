@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#--------------------- Connectivity for a square elements is done-------------------------------#
+#---------------------------Connectivity of elements is done------------------------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -50,8 +50,12 @@ def FindSpan(n_inp,degree_inp,u_inp,knot_vector_inp):
     Return: 
         The function returns the span of the parametric co-ordinate in the knot vector
     """
-    if (u_inp < knot_vector_inp[degree_inp+1]):
+    x=knot_vector_inp[degree_inp+1]                 # Second Unique knot
+    y=knot_vector_inp[-(degree_inp+2)]              # Last but one Unique knot
+    if (u_inp < x ):
         return degree_inp
+    elif (u_inp>y):
+        return (len(knot_vector_inp)-(degree_inp+2))
     else:
         for i,pos in enumerate(knot_vector_inp):
             if math.floor(u_inp) == pos:
@@ -217,6 +221,7 @@ def DersBasisFuns(i,u,p,m,U):
 #A modified version of Algorithm A3.6 from NURBS Book Page no. 111
 #An extra W is given as input to function for convinience which contain weights of corresponding control points
 def SurfaceDerivsAlgAuv(n,p,U,m,q,V,P,W,u,v,d):
+    #print('P,W,AdersWders',P,W)
     SKL_A=np.zeros((20,20,3))
     SKL_W=np.zeros((20,20,1))
     temp_A=np.zeros((20,3))
@@ -252,6 +257,7 @@ def SurfaceDerivsAlgAuv(n,p,U,m,q,V,P,W,u,v,d):
                 for s in range(q+1):
                     SKL_A[k][l] = SKL_A[k][l] + vnders[l][s]*temp_A[s]
                     SKL_W[k][l] = SKL_W[k][l] + vnders[l][s]*temp_W[s]
+    #print('SKL_A,SKL_W',SKL_A,SKL_W)
     return SKL_A,SKL_W
 
 #---------------------Test case 1-----------------------------#
@@ -447,8 +453,49 @@ def NURBS_Surface_Point(n,p,U,m,q,V,Pw,u,v):
 # U = np.array([0., 0., 1., 1.])
 # V = np.array([0., 0., 1., 1.])
 # #*****Should take care of this. It is generating divide by zero when u and v value equal to last knot vector value
-# u_values=np.linspace(U[0],(U[-1]-0.1),5)
-# v_values=np.linspace(V[0],(V[-1]-0.1),5)
+# u_values=np.linspace(U[0],(U[-1]),5)
+# v_values=np.linspace(V[0],(V[-1]),5)
+# surface=np.zeros((np.size(u_values),np.size(v_values),3))
+# p=1
+# q=1
+# n=(np.size(U)-1)-p-1
+# m=(np.size(V)-1)-q-1
+# Pw=np.array([[[0,0,0,1],[1,0,0,1]],
+#           [[0,1,0,1],[1,1,0,1]]])
+# for i,u in enumerate(u_values):
+#     for j,v in enumerate(v_values):
+#         S_r = NURBS_Surface_Point(n,np.copy(p),U,m,np.copy(q),V,Pw,u,v)
+#         surface[i,j]=S_r
+# # print(surface[0,:,0])
+# # print(surface[:,1,1])
+# y_values=surface[0,:,0]
+# x_values=surface[:,1,1]
+# X,Y=np.meshgrid(x_values,y_values)
+# Z=np.zeros_like(X)
+
+# from mpl_toolkits.mplot3d import Axes3D  
+# # Axes3D import has side effects, it enables using projection='3d' in add_subplot
+
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+
+# ax.plot_surface(X, Y, Z)
+
+# ax.set_xlabel('X Label')
+# ax.set_ylabel('Y Label')
+# ax.set_zlabel('Z Label')
+
+#plt.show()
+
+#----------------------------Test Case 3-----------------------------#
+
+#----------------------------Plotting a Circle-----------------------------#
+
+# U = np.array([0., 0., 1., 1.])
+# V = np.array([0., 0., 1., 1.])
+# #*****Should take care of this. It is generating divide by zero when u and v value equal to last knot vector value
+# u_values=np.linspace(U[0],(U[-1]),5)
+# v_values=np.linspace(V[0],(V[-1]),5)
 # surface=np.zeros((np.size(u_values),np.size(v_values),3))
 # p=1
 # q=1
