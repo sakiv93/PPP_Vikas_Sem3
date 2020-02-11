@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#---------------------------Connectivity of elements is done------------------------------------#
+#---------------------------Code Works for any degree of the NURBS Curve------------------------#
 import numpy as np 
 import math
 from Geometry import *
@@ -67,5 +67,5 @@ U_g_0[Left_nodes_e]   = 0
 
 #-------------Replace this every time-----------------------#
 BCS=np.sort(np.concatenate((Right_nodes_u,Top_nodes_u,Bottom_nodes_u,Left_nodes_u,Left_nodes_e,)))
-#print(BCS)
+print('BCS',BCS)
 #print(U_g_0)

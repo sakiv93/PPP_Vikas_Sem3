@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#---------------------------Connectivity of elements is done------------------------------------#
+#---------------------------Code Works for any degree of the NURBS Curve------------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -33,17 +33,33 @@ def Jacobian12(xi,eta,elU,elV):
     Aders,wders = SurfaceDerivsAlgAuv(n,p,U,m,q,V,P,W,xi,eta,d)
     #print('Aders:',Aders)
     #print('wders:',wders)
-    dRx = RatSurfaceDerivs(Aders,wders,d)
-    #print('dRx',dRx)
-    dRx_dxi  =  dRx[1][0][0]
-    dRx_deta =  dRx[0][1][0]
-    dRy_dxi  =  dRx[1][0][1]
-    dRy_deta =  dRx[0][1][1]
-    print('dRx',dRx[1][0][0],dRx[0][1][0],dRx[1][0][1],dRx[0][1][1])
-    J1 = np.array([[dRx_dxi,dRx_deta],
-                [dRy_dxi,dRy_deta]])
-    #print('J1 Matrix : ',J1)
-    J1det = (dRx_dxi*dRy_deta)-(dRx_deta*dRy_dxi)
+
+    #-----------------------------------------------------------------------------------------------
+    #---------------------- Without using RatSurfaceDerivs----------------------------#
+    dRx_dxi     = (Aders[1][0][0]*wders[0][0] - wders[1][0]*Aders[0][0][0])/(wders[0][0]*wders[0][0])
+    dRy_dxi     = (Aders[1][0][1]*wders[0][0] - wders[1][0]*Aders[0][0][1])/(wders[0][0]*wders[0][0])
+    dRx_deta    = (Aders[0][1][0]*wders[0][0] - wders[0][1]*Aders[0][0][0])/(wders[0][0]*wders[0][0])
+    dRy_deta     = (Aders[0][1][1]*wders[0][0] - wders[0][1]*Aders[0][0][1])/(wders[0][0]*wders[0][0])
+    J1 = np.array([[dRx_dxi[0],dRx_deta[0]],
+                [dRy_dxi[0],dRy_deta[0]]])
+    print('J1',J1)
+
+
+    #-----------------------------------------------------------------------------------------------
+    # dRx = RatSurfaceDerivs(Aders,wders,d)
+    # #print('dRx',dRx)
+    # dRx_dxi  =  dRx[1][0][0]
+    # dRx_deta =  dRx[0][1][0]
+    # dRy_dxi  =  dRx[1][0][1]
+    # dRy_deta =  dRx[0][1][1]
+    # print('dRx',dRx[1][0][0],dRx[0][1][0],dRx[1][0][1],dRx[0][1][1])
+    # J1 = np.array([[dRx_dxi,dRx_deta],
+    #             [dRy_dxi,dRy_deta]])
+    # print('J1 Matrix : ',J1)
+    #-----------------------------------------------------------------------------------------------
+
+
+    J1det = (dRx_dxi[0]*dRy_deta[0])-(dRx_deta[0]*dRy_dxi[0])
     J1inv = np.linalg.inv(J1)
     #print('J1inv : ',J1inv)
     return J1,J1det,J2det
@@ -71,7 +87,7 @@ def B_matrix(xi,eta,J1):
     # Indices of non vanishing basis functions
     NVu = np.arange(uspan-p,uspan+1,1) #Thoroughly checked. Can crosscheck again
     print('NVu',NVu)
-    NVv = np.arange(vspan-p,vspan+1,1)
+    NVv = np.arange(vspan-q,vspan+1,1)
     print('NVv',NVv)
     Aders,wders = SurfaceDerivsAlgAuv(n,p,U,m,q,V,P,W,xi,eta,d)
     Denom = wders[0][0]
@@ -82,8 +98,8 @@ def B_matrix(xi,eta,J1):
     # dR_dv = np.zeros((ncpxi,ncpeta))
     #***********************************************************
 
-    dR_dx = np.zeros((necpxi,necpxi))
-    dR_dy = np.zeros((necpxi,necpxi))
+    dR_dx = np.zeros((necpxi,necpeta))
+    dR_dy = np.zeros((necpxi,necpeta))
     #---------------Loop over Non vanishing NURBS Basis Functions-------------#
     #***************Forgot to multiply with control points weights*************# Have to do it
     for ii, ii_value in enumerate(NVu):
@@ -117,8 +133,8 @@ def B_matrix(xi,eta,J1):
             
             # dR_dxi[ii][jj] = Num_du/Denom - Denom_du*Num/(Denom*Denom)
             # dR_deta[ii][jj] = Num_dv/Denom - Denom_dv*Num/(Denom*Denom)
-            print('dR_du',dR_dx[ii][jj])
-            print('dR_dv',dR_dy[ii][jj])
+    print('dR_dx',dR_dx)
+    print('dR_dy',dR_dy)
     #-------------Have to multiply dR_du / dR_dv matrix with jacobian matrix-------------------#
 
 
@@ -215,8 +231,8 @@ def elementRoutine(U_e,elU,elV,T_m):
         print('Be:',Bematrix)
 
         # U_u contains mechanical displcement from node 1 to 4, and U_phi contains electric potential from node 1 to 4
-        U_u=U_e[0:8]
-        U_phi = U_e[8:]
+        U_u=U_e[0:necp*nudof]
+        U_phi = U_e[necp*nudof:]
         print('U_u',U_u)
         print('U_phi',U_phi)
 
@@ -253,14 +269,14 @@ def elementRoutine(U_e,elU,elV,T_m):
         #print('KEE:',K_EE)
 
         #Arranging to Kt_e matrix 
-        Kt_e[0:8,0:8]   = K_MM
-        Kt_e[0:8,8:12]  = K_ME
-        Kt_e[8:12,0:8]  = K_EM
-        Kt_e[8:12,8:12] = K_EE
-        print('K_MM',Kt_e[0:8,0:8])
-        print('K_ME',Kt_e[0:8,8:12])
-        print('K_EM',Kt_e[8:12,0:8])
-        print('K_EE',Kt_e[8:12,8:12])
+        Kt_e[0:necp*nudof,0:necp*nudof]                                 = K_MM
+        Kt_e[0:necp*nudof,necp*nudof:necp*(nudof+nedof)]                = K_ME
+        Kt_e[necp*nudof:necp*(nudof+nedof),0:necp*nudof]                 = K_EM
+        Kt_e[necp*nudof:necp*(nudof+nedof),necp*nudof:necp*(nudof+nedof)] = K_EE
+        print('K_MM',Kt_e[0:necp*nudof,0:necp*nudof])
+        print('K_ME',Kt_e[0:necp*nudof,necp*nudof:necp*(nudof+nedof)])
+        print('K_EM',Kt_e[necp*nudof:necp*(nudof+nedof),0:necp*nudof])
+        print('K_EE', Kt_e[necp*nudof:necp*(nudof+nedof),necp*nudof:necp*(nudof+nedof)])
 
         Fu_int_e= Fu_int_e+np.matmul(np.transpose(Bumatrix),sigma)*J1det*J2det*wg*Thick
         Fe_int_e= Fe_int_e+np.matmul(np.transpose(Bematrix),Electrical_Displacement)*J1det*J2det*wg*Thick

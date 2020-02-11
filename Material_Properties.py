@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#---------------------------Connectivity of elements is done------------------------------------#
+#---------------------------Code Works for any degree of the NURBS Curve------------------------#
 import numpy as np
 
 yield_stress=210 #MPa

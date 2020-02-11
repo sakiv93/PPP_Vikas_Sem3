@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#---------------------------Connectivity of elements is done------------------------------------#
+#---------------------------Code Works for any degree of the NURBS Curve------------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -537,10 +537,10 @@ def NURBS_Surface_Point(n,p,U,m,q,V,Pw,u,v):
 # p_ord-order of basis function along xi direction
 # m-no.of control points along eta direction
 # q_ord-order of basis function along eta direction
-def ControlPointAssembly(n,p_ord,m,q_ord,ele_no):
-    nel= (n-p_ord)*(m-q_ord) 
+def ControlPointAssembly(n,p,m,q,ele_no):
+    nel= (n-p)*(m-q) 
     ncp= n*m
-    necp = (p_ord+1)*(q_ord+1)
+    necp = (p+1)*(q+1)
     ControlPointAssemblyArray = np.zeros((necp,nel))
 
     A=0
@@ -548,12 +548,12 @@ def ControlPointAssembly(n,p_ord,m,q_ord,ele_no):
     for j in range(1,m+1):
         for i in range(1,n+1):
             A=A+1
-            if (i>=(p_ord+1) and j>=(q_ord+1)):
+            if (i>=(p+1) and j>=(q+1)):
                 e=e+1
-                for jloc in range(q_ord+1):
-                    for iloc in range(p_ord+1):
+                for jloc in range(q+1):
+                    for iloc in range(p+1):
                         B=A-jloc*n-iloc
-                        b=jloc*(p_ord+1)+iloc+1
+                        b=jloc*(p+1)+iloc+1
                         ControlPointAssemblyArray[b-1,e-1]=B
     CP = np.flip(np.transpose(ControlPointAssemblyArray),axis=1)-1 #To generate data in proper order
     # -1 so that indices will start from '0'

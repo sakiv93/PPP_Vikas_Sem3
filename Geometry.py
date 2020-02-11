@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#---------------------------Connectivity of elements is done------------------------------------#
+#---------------------------Code Works for any degree of the NURBS Curve------------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -13,14 +13,16 @@ Length  = 10.0
 Height  = 10.0
 
 #------------------Number of elements in xi and eta direction-----------------------------#
-nexi    = 2 # No.of elements in xi  direction
-neeta   = 3 # No.of elements in eta direction
+nexi    = 1 # No.of elements in xi  direction
+neeta   = 1 # No.of elements in eta direction
 
-#GPs_Ws = np.array([[-0.57735,-0.57735,1],[0.57735,-0.57735,1],[0.57735,0.57735,1],[-0.57735,0.57735,1]])
-GPs_Ws = np.array([[-1/(3**(1/2)),-1/(3**(1/2)),1],[1/(3**(1/2)),-1/(3**(1/2)),1],[1/(3**(1/2)),1/(3**(1/2)),1],[-1/(3**(1/2)),1/(3**(1/2)),1]])
+# GPs_Ws = np.array([[-0.57735,-0.57735,1],[0.57735,-0.57735,1],[0.57735,0.57735,1],[-0.57735,0.57735,1]])
+GPs_Ws = np.array([[0.7746,0.7746,0.2743],[0.7746,-0.7746,0.2743],[0.7746,0.,0.4390],[-0.7746,0.7746,0.2743],
+                    [-0.7746,-0.7746,0.2743],[-0.7746,0.,0.4390],[0.,0.7746,0.4390],[0.,-0.7746,0.4390],[0.,0.,0.7023]])
 
-p=1 #Degree of the curve in xi direction
-q=1 #Degree of the curve in eta direction
+
+p=3 #Degree of the curve in xi direction
+q=3 #Degree of the curve in eta direction
 
 p_ord=p+1 #order of the curve in xi direction
 q_ord=q+1 #order of the curve in eta direction
@@ -31,14 +33,18 @@ nedof = 1 #Number of electrical degrees of freedom on each node
 
 #----------Need not alter below variables--------------#
 #-----------------------Calculating Control point matrix----------------------------------#
-P_W =np.zeros((neeta+1,nexi+1,4)) 
-for j in range(neeta+1):
-    for i in range(nexi+1):
-        P_W[j,i,0] = (Length/nexi)*i
-        P_W[j,i,1] = (Height/neeta)*j
-        P_W[j,i,2] = 0
-        P_W[j,i,3] = 1                      # Weights for respective control points
-print(P_W)
+# P_W=np.array([[[0.,0.,0.,1.],[5.,0.,0.,1.],[10.,0.,0.,1.]],
+#              [[0.,5.,0.,1.],[5.,5.,0.,1.],[10.,5.,0.,1.]],
+#              [[0.,10.,0.,1.],[5.,10.,0.,1.],[10.,10.,0.,1.]]])
+
+# P_W=np.array([[[0,0,0,1],[10,0,0,1]],
+#              [[0,5,0,1],[10,5,0,1]],
+#              [[0,10,0,1],[10,10,0,1]]])
+
+P_W=np.array([[[0.,0.,0.,1.],[2.5,0.,0.,1.],[5.,0.,0.,1.],[10.,0.,0.,1.]],
+             [[0.,2.5,0.,1.],[2.5,2.5,0.,1.],[5.,2.5,0.,1.],[10.,2.5,0.,1.]],
+             [[0.,5.,0.,1.],[2.5,5.,0.,1.],[5.,5.,0.,1.],[10.,5.,0.,1.]],
+             [[0.,10.,0.,1.],[2.5,10.,0.,1.],[5.,10.,0.,1.],[10.,10.,0.,1.]]])
 
 # Input control point vector to element routine as a transpose
 P_W_T = P_W.transpose((1,0,2))  #Here it is a 3D array (0,1,2) -- it is transposed to (1,0,2)
@@ -49,8 +55,10 @@ ncpeta=np.shape(P_W)[0] #No.of control points eta direction
 
 U = KnotVector(p,ncpxi)
 V = KnotVector(q,ncpeta)
-print(U)
-print(V)
+#U = np.array([0., 0., 0., 1, 2., 2., 2.])  #Knot vector in x direction
+#V = np.array([0., 0., 0., 1, 2., 2., 2.])   #Knot vector in y direction
+print('KnotVectorU',U)
+print('KnotVectorV',V)
 
 
 n=(np.size(U)-1)-p-1

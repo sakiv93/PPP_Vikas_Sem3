@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#---------------------------Connectivity of elements is done------------------------------------#
+#---------------------------Code Works for any degree of the NURBS Curve------------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -105,9 +105,9 @@ for i in range(1):
 
             #------------For loops to connect local stiffness matrix to global stiffness matrix------------#
             for val1,index1 in enumerate(u_e_indices):
-                print('Connecticity outer loop:',val1,index1)
+                #print('Connecticity outer loop:',val1,index1)
                 for val2,index2 in enumerate(u_e_indices):
-                    print('Connecticity inner loop:',val2,index2)
+                    #print('Connecticity inner loop:',val2,index2)
                     Kt_g[index1,index2] = Kt_g[index1,index2] +K_e[val1,val2]
             print('Global Stiffness matrix \n after element no.',j,'is:\n',Kt_g)
 
