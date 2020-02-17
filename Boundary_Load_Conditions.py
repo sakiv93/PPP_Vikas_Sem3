@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#---------------------------Code Works for any degree of the NURBS Curve------------------------#
+#----------------------------One Program for any degree curve-----------------------------------#
 import numpy as np 
 import math
 from Geometry import *
@@ -12,7 +12,7 @@ Bottom_nodes_u = np.zeros(ncpxi)
 for BNu in range(ncpxi):
     Bottom_nodes_u[BNu] =2*BNu+1
 Bottom_nodes_u= Bottom_nodes_u.astype(int)
-print(Bottom_nodes_u)
+print('Bottom_nodes_u',Bottom_nodes_u)
 
 #-------------Left nodes displacement x Dof------------------#
 Left_nodes_u = np.zeros(ncpeta)
@@ -63,9 +63,9 @@ U_g_0[Left_nodes_u]   = 0
 U_g_0[Left_nodes_e]   = 0
 
 #----------------Electrical Loading----------------#
-#U_g_0[Right_nodes_e]  = 1000
+#U_g_0[Right_nodes_e]  = 500000000
 
 #-------------Replace this every time-----------------------#
-BCS=np.sort(np.concatenate((Right_nodes_u,Top_nodes_u,Bottom_nodes_u,Left_nodes_u,Left_nodes_e,)))
-print('BCS',BCS)
+BCS=np.sort(np.concatenate((Right_nodes_u,Top_nodes_u,Bottom_nodes_u,Left_nodes_u,Left_nodes_e)))
+#print(BCS)
 #print(U_g_0)

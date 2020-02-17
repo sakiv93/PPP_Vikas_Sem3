@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#---------------------------Code Works for any degree of the NURBS Curve------------------------#
+#----------------------------One Program for any degree curve-----------------------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -133,8 +133,8 @@ def B_matrix(xi,eta,J1):
             
             # dR_dxi[ii][jj] = Num_du/Denom - Denom_du*Num/(Denom*Denom)
             # dR_deta[ii][jj] = Num_dv/Denom - Denom_dv*Num/(Denom*Denom)
-    print('dR_dx',dR_dx)
-    print('dR_dy',dR_dy)
+            print('dR_du',dR_dx[ii][jj])
+            print('dR_dv',dR_dy[ii][jj])
     #-------------Have to multiply dR_du / dR_dv matrix with jacobian matrix-------------------#
 
 

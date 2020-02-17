@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#---------------------------Code Works for any degree of the NURBS Curve------------------------#
+#----------------------------One Program for any degree curve-----------------------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -41,7 +41,7 @@ def KnotVector(degree,n_control_points):
 def FindSpan(n_inp,degree_inp,u_inp,knot_vector_inp):
     """
     Input: 
-        Input [no.control points - (degree+1)] as (n_inp) 
+        Input [(no.control points-1) - (degree+1)] as (n_inp) 
         degree of NURBS curve (degree_inp),
         Parametric Co-ordinate(u_inp) on the curve
         knot vector of the curve (knot_vector_inp)
@@ -319,95 +319,26 @@ def SurfaceDerivsAlgAuv(n,p,U,m,q,V,P,W,u,v,d):
 # print(S_W_Derivatives[0][0]) #Answer as in page 133 NURBS book
 # #Zeroth derivative (S_Derivatives[0][0]) in both direction should yield surface point itself
 
-
-#----------------NURBS Function Surface point derivative----------------------#
-
-#Functions gives SKL matrix which contain kth ans lth derivatives of the NURBS Surface function S(u,v)
-#For example 1st derivative of S(u,v) wrt to xi_para is stored in SKL[1][0]
-#Likewise 1st derivative of S(u,v) wrt to eta_para is stored in SKL[0][1]
-
-def RatSurfaceDerivs(Aders,wders,d):
-    #SKL=np.zeros((p+1,q+1,3))
-    SKL=np.zeros((20,20,3))
-    for k in range(d+1):
-        for l in range(d-k+1):
-            v=Aders[k][l]
-            for j in range(1,l+1):
-               # print('B',special.binom(l,j))
-                v=v-special.binom(l,j)*wders[0][j]*SKL[k][l-j]
-            for i in range(1,k+1):
-                v=v-special.binom(k,i)*wders[i][0]*SKL[k-i][l]
-                v2 = 0.0
-                for j in range(1,l+1):
-                    v2=v2+special.binom(l,j)*wders[i][j]*SKL[k-i][l-j]
-                v = v-special.binom(k,i)*v2
-            SKL[k][l] = v/wders[0][0]
-    return SKL
-
-
-#--------------------------------Test case-----------------------#
-
-
-# U = np.array([0., 0., 0., 1., 2., 3., 4., 4., 5., 5., 5.])
-# V = np.array([0., 0., 0., 1., 2., 3., 3., 3.])
-# u=2.5
-# v=1
-# p=2
-# q=2
-# n=(np.size(U)-1)-p-1
-# m=(np.size(V)-1)-q-1
-# d=4 # 1st deivative in both directions , d greater than p and q is allowed
-# #****# Missed out on condition 0<=k+l<=d
-# ##The below control points are random but important part is adapted from NURBS book 133 page
-# #               [[0.,2.,4.,1.],[0.,6.,4.,2.],[0.,2.,0.,1.]]
-# #               [[4.,6.,8.,2.],[12.,24.,12.,6.],[4.,6.,0.,2.]]
-# #               [[4.,2.,4.,1.],[8.,6.,4.,2.],[4.,2.,0.,1.]]
-# P_W=np.array([[[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.]],
-#             [[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.]],
-#             [[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,6.,4.,2.],[0.,2.,0.,1.],[0.,2.,4.,1.]],
-#             [[0.,2.,4.,1.],[4.,6.,8.,2.],[12.,24.,12.,6.],[4.,6.,0.,2.],[0.,2.,4.,1.]],
-#             [[0.,2.,4.,1.],[4.,2.,4.,1.],[8.,6.,4.,2.],[4.,2.,0.,1.],[0.,2.,4.,1.]],
-#             [[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.]],
-#             [[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.]],
-#             [[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.]]])
-# # Control point vector (P_W_1) with all weights equal to 1
-# P_W_1=np.array([[[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.]],
-#             [[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.]],
-#             [[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,6.,4.,1.],[0.,2.,0.,1.],[0.,2.,4.,1.]],
-#             [[0.,2.,4.,1.],[4.,6.,8.,1.],[12.,24.,12.,1.],[4.,6.,0.,1.],[0.,2.,4.,1.]],
-#             [[0.,2.,4.,1.],[4.,2.,4.,1.],[8.,6.,4.,1.],[4.,2.,0.,1.],[0.,2.,4.,1.]],
-#             [[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.]],
-#             [[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.]],
-#             [[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.],[0.,2.,4.,1.]]])
-# P=P_W[:,:,0:3]
-# W=P_W[:,:,3]
-# P_1=P_W_1[:,:,0:3]
-# W_1=P_W_1[:,:,3]
-
-# Aders,wders = SurfaceDerivsAlgAuv(n,p,U,m,q,V,P,W,u,v,d)
-# NURBS_Surface_Derivative = RatSurfaceDerivs(Aders,wders,d)
-# print(NURBS_Surface_Derivative[0][0])
-
-# #Expected result : Results same as function SurfaceDerivsAlg1
-# Aders,wders = SurfaceDerivsAlgAuv(n,p,U,m,q,V,P_1,W_1,u,v,d)
-# NURBS_Surface_Derivative = RatSurfaceDerivs(Aders,wders,d)
-# print(NURBS_Surface_Derivative[0][0])
-
 #----------------Point on NURBS Surface---------------------#
 
 #A modified version of Algorithm A4.3 from NURBS Book Page no. 134
-def NURBS_Surface_Point(n,p,U,m,q,V,Pw,u,v):
+def NURBS_Surface_Point_Extra(n,p,U,m,q,V,Pw,u,v):
+    #print('p,q,u,v',p,q,u,v)
+    #print('UV',U,V)
     surface_point=np.zeros(3)
     temp=np.zeros(q+1)
     uspan = FindSpan(n,p,u,U)
     Nu=BasisFuns(uspan,u,p,U)
+    #print('Nu',Nu)
     vspan = FindSpan(m,q,v,V)
     Nv=BasisFuns(vspan,v,q,V)
+    #print('Nv',Nv)
     S=np.zeros(4)
     for d in range(4):
         for l in range(q+1):
             temp[l]=0.0
             for k in range(p+1):
+                #print('k,uspan-p+k,vspan-q+l',k,uspan-p+k,vspan-q+l)
                 temp[l]=temp[l]+Nu[k]*np.array(Pw[uspan-p+k][vspan-q+l][d])
         Sw=0.0
         for l in range(q+1):
@@ -416,6 +347,39 @@ def NURBS_Surface_Point(n,p,U,m,q,V,Pw,u,v):
     #S = Sw/w
     #S = Sw
     surface_point=S[:-1]/S[-1]
+    return surface_point
+
+
+def NURBS_Surface_Point(n,p,U,m,q,V,Pw,u,v):
+    """
+    Input: 
+        Input [(no.control points-1) - (degree+1)] in xi and eta direction as {n} and {m}
+        Degree of the curve in xi and eta direction {p} and {q} respectively
+        knot vector of the NURBS curve in xi and eta direction {U} and {V} respectively
+        Control point matrix as {Pw} 
+        parametric co-ordinates {u} and {v} on NURBS curve in xi and eta direction 
+        respectively
+    Process: 
+        The function performs tensor product between NURBS basis functions
+        in xi and eta directions.
+    Return: 
+        The function returns physical co-ordinates of the NURBS surface point from the 
+        given parametric co-ordinates {u} and {v}
+    """
+    surface_point=np.zeros(3)
+    uspan = FindSpan(n,p,u,U)
+    Nu=BasisFuns(uspan,u,p,U)
+    vspan = FindSpan(m,q,v,V)
+    Nv=BasisFuns(vspan,v,q,V)
+    S=np.zeros(4)
+    for d in range(4):
+        Sw=0.0
+        for j in range(q+1):
+            for i in range(p+1):
+                Sw = Sw + Nu[i]*Nv[j]*Pw[uspan-p+i][vspan-q+j][d]
+        S[d]=Sw   
+    #surface_point=S[:-1]/S[-1]
+    surface_point=S[:-1]
     return surface_point
 
 #----------------------------Test Case 1-----------------------------#
@@ -530,13 +494,11 @@ def NURBS_Surface_Point(n,p,U,m,q,V,Pw,u,v):
 
 #****** Algorithm from IGA Simplified paper ********#
 
-#***# Provide 1 order less for a 2 control point case
-
 #-----------------Inputs-----------------------#
 # n-no.of control points along xi direction
-# p_ord-order of basis function along xi direction
+# p-Degree of basis function along xi direction
 # m-no.of control points along eta direction
-# q_ord-order of basis function along eta direction
+# q-Degree  of basis function along eta direction
 def ControlPointAssembly(n,p,m,q,ele_no):
     nel= (n-p)*(m-q) 
     ncp= n*m
@@ -558,7 +520,6 @@ def ControlPointAssembly(n,p,m,q,ele_no):
     CP = np.flip(np.transpose(ControlPointAssemblyArray),axis=1)-1 #To generate data in proper order
     # -1 so that indices will start from '0'
     return  CP[ele_no]
-    
 
 
 # #----------------------------Test Case 2-----------------------------#

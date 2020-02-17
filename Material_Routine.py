@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#---------------------------Code Works for any degree of the NURBS Curve------------------------#
+#----------------------------One Program for any degree curve-----------------------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
