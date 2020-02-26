@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#----------------------------One Program for any degree curve-----------------------------------#
+#------------------------------------------26 Feb-----------------------------------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -14,7 +14,7 @@ from Boundary_Load_Conditions import *
 import sys 
 
 stdoutOrigin=sys.stdout 
-sys.stdout = open("log1.txt", "w")
+sys.stdout = open("log.txt", "w")
 
 #initialization of time like parameter and displacement vector and state variables
 tau_start = 0
@@ -198,10 +198,105 @@ P_W_new_T = P_W_new.transpose((1,0,2))
 #------------------------------------------------------------------------------------------#
 
 
+# #------------------------Plotting--------------------------#
+# x_positions=np.linspace(U[0],(U[-1]),ncpxi)
+# #print('x_positions',x_positions)
+# y_positions=np.linspace(V[0],(V[-1]),ncpeta)
+# surface=np.zeros((np.size(x_positions),np.size(y_positions),3))
+# for i,u in enumerate(x_positions):
+#     for j,v in enumerate(y_positions):
+#         # Here send input as displaced positions of control points matrix i.e P_new = P + U
+#         S_r = NURBS_Surface_Point(n,p,U,m,q,V,P_W_new_T,u,v)
+#         surface[i,j]=S_r
+# #Surface generated will be a transpose of what is desired since 
+# #NURBS_Surface_Point algorithm is modelled in such a way so a transpose is required.
+# surface = surface.transpose((1,0,2)) 
+# #print(np.shape(surface))
+# #print('Surface',surface)
+# X=surface[:,:,0]
+# #print('Y',Y)
+# Y=surface[:,:,1]
+# print('X',X)
+# #print('X',X)
+# #print('Y',Y)
+
+
+# #------------------U1 Plotting----------------------#
+# fig,ax=plt.subplots()
+# level = np.linspace(np.amin(X),np.amax(X),13)
+# plt.contourf(X, Y, X,levels=level,cmap='jet')
+# plt.colorbar()
+# ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'U1')
+# #---------------------------------------------------#
+# #------------------U2 Plotting----------------------#
+# fig,ax=plt.subplots()
+# level = np.linspace(np.amin(Y),np.amax(Y),13)
+# plt.contourf(X, Y, Y,levels=level,cmap='jet')
+# plt.colorbar()
+# ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'U2')
+# #---------------------------------------------------#
+
+# #------------------RF Plotting Calculations----------------------#
+# Mechanical_RF = F_g_int[0:ncp*nudof]
+# Mechanical_RF = Mechanical_RF.reshape((ncpeta,ncpxi,2))
+# print('Mechanical_RF',Mechanical_RF)
+# RF1=Mechanical_RF[:,:,0]
+# print('RF1',RF1)
+# RF2=Mechanical_RF[:,:,1]
+# #----------------------------------------------------------------#
+# #------------------RF1 Plotting----------------------#
+# fig,ax=plt.subplots()
+# level = np.linspace(np.amin(RF1),np.amax(RF1),13)
+# plt.contourf(X, Y, RF1,levels=level,cmap='jet')
+# plt.colorbar()
+# ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'RF1')
+# #---------------------------------------------------#
+
+# #------------------RF2 Plotting----------------------#
+# fig,ax=plt.subplots()
+# level = np.linspace(np.amin(RF2),np.amax(RF2),13)
+# plt.contourf(X, Y, RF2,levels=level,cmap='jet')
+# plt.colorbar()
+# ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'RF2')
+# #---------------------------------------------------#
+
+# # #-----------------Plotting Electrical Potential Calculations-----------------#
+# # EPOT=U_g_0[nudof*ncp:(nudof*ncp+nedof*ncp)]
+# # EPOT=EPOT.reshape((ncpeta,ncpxi))
+# # print('EPOT',EPOT)
+# # #----------------------------------------------------------------------------#
+
+# # #-----------------Plotting Electrical Potential -----------------------------#
+# # fig,ax=plt.subplotsj()
+# # level = np.linspace(np.amin(EPOT),np.amax(EPOT),13)
+# # plt.contourf(X, Y, EPOT,levels=level,cmap='jet')
+# # plt.colorbar()
+# # ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'EPOT')
+# # #----------------------------------------------------------------------------#
+
+
+
+# # #--------------Plotting Electrical Reaction Forces Calculations---------------#
+# # Electrical_RF = F_g_int[nudof*ncp:(nudof*ncp+nedof*ncp)]
+# # Electrical_RF = Electrical_RF.reshape((ncpeta,ncpxi))
+# # print('Electrical_RF',Electrical_RF)
+# # #-----------------------------------------------------------------------------#
+
+# # #-----------------Plotting Electrical Reaction Forces-------------------------#
+# # fig,ax=plt.subplots()
+# # level = np.linspace(np.amin(Electrical_RF),np.amax(Electrical_RF),13)
+# # plt.contourf(X, Y, Electrical_RF,levels=level,cmap='jet')
+# # plt.colorbar()
+# # ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'Electrical_RF')
+# # #-----------------------------------------------------------------------------#
+
+
+
+
 #------------------------Plotting--------------------------#
-x_positions=np.linspace(U[0],(U[-1]),ncpxi)
+x_positions=np.linspace(U[0],(U[-1]),20)
 #print('x_positions',x_positions)
-y_positions=np.linspace(V[0],(V[-1]),ncpeta)
+y_positions=np.linspace(V[0],(V[-1]),20)
 surface=np.zeros((np.size(x_positions),np.size(y_positions),3))
 for i,u in enumerate(x_positions):
     for j,v in enumerate(y_positions):
@@ -214,79 +309,22 @@ surface = surface.transpose((1,0,2))
 #print(np.shape(surface))
 #print('Surface',surface)
 X=surface[:,:,0]
-#print('Y',Y)
-Y=surface[:,:,1]
 print('X',X)
+Y=surface[:,:,1]
+print('Y',Y)
 #print('X',X)
 #print('Y',Y)
-#------------------U1 Plotting----------------------#
-fig,ax=plt.subplots()
-level = np.linspace(np.amin(X),np.amax(X),13)
-plt.contourf(X, Y, X,levels=level,cmap='rainbow')
-plt.colorbar()
-ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'U1')
-#---------------------------------------------------#
-#------------------U2 Plotting----------------------#
-fig,ax=plt.subplots()
-level = np.linspace(np.amin(Y),np.amax(Y),13)
-plt.contourf(X, Y, Y,levels=level,cmap='rainbow')
-plt.colorbar()
-ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'U2')
-#---------------------------------------------------#
-
-#------------------RF Plotting Calculations----------------------#
-Mechanical_RF = F_g_int[0:ncp*nudof]
-Mechanical_RF = Mechanical_RF.reshape((ncpeta,ncpxi,2))
-print('Mechanical_RF',Mechanical_RF)
-RF1=Mechanical_RF[:,:,0]
-print('RF1',RF1)
-RF2=Mechanical_RF[:,:,1]
-#----------------------------------------------------------------#
-#------------------RF1 Plotting----------------------#
-fig,ax=plt.subplots()
-level = np.linspace(np.amin(RF1),np.amax(RF1),13)
-plt.contourf(X, Y, RF1,levels=level,cmap='rainbow')
-plt.colorbar()
-ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'RF1')
-#---------------------------------------------------#
-
-#------------------RF2 Plotting----------------------#
-fig,ax=plt.subplots()
-level = np.linspace(np.amin(RF2),np.amax(RF2),13)
-plt.contourf(X, Y, RF2,levels=level,cmap='rainbow')
-plt.colorbar()
-ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'RF2')
-#---------------------------------------------------#
-
-#-----------------Plotting Electrical Potential Calculations-----------------#
-EPOT=U_g_0[nudof*ncp:(nudof*ncp+nedof*ncp)]
-EPOT=EPOT.reshape((ncpeta,ncpxi))
-print('EPOT',EPOT)
-#----------------------------------------------------------------------------#
-
-#-----------------Plotting Electrical Potential -----------------------------#
-fig,ax=plt.subplots()
-level = np.linspace(np.amin(EPOT),np.amax(EPOT),13)
-plt.contourf(X, Y, EPOT,levels=level,cmap='rainbow')
-plt.colorbar()
-ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'EPOT')
-#----------------------------------------------------------------------------#
-
-
-
-#--------------Plotting Electrical Reaction Forces Calculations---------------#
-Electrical_RF = F_g_int[nudof*ncp:(nudof*ncp+nedof*ncp)]
-Electrical_RF = Electrical_RF.reshape((ncpeta,ncpxi))
-print('Electrical_RF',Electrical_RF)
-#-----------------------------------------------------------------------------#
+Z=np.zeros_like(X)
 
 #-----------------Plotting Electrical Reaction Forces-------------------------#
 fig,ax=plt.subplots()
-level = np.linspace(np.amin(Electrical_RF),np.amax(Electrical_RF),13)
-plt.contourf(X, Y, Electrical_RF,levels=level,cmap='rainbow')
+#level = np.linspace(np.amin(Electrical_RF),np.amax(Electrical_RF),13)
+plt.contourf(X, Y, Z,cmap='jet')
 plt.colorbar()
-ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'Electrical_RF')
+ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'Z')
 #-----------------------------------------------------------------------------#
+
+
 
 
 sys.stdout.close()

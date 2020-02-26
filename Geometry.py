@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#----------------------------One Program for any degree curve-----------------------------------#
+#------------------------------------------26 Feb-----------------------------------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -18,16 +18,50 @@ Length  = 10.0
 Height  = 10.0
 
 #------------------Number of Control points in xi and eta direction-----------------------------#
-ncpxi    = 5 # No.of control points in xi  direction
-ncpeta   = 5 # No.of control points in eta direction
+ncpxi    = 3 # No.of control points in xi  direction
+ncpeta   = 3 # No.of control points in eta direction
 
-if(p==1 and q==1):
-    #GPs_Ws = np.array([[-0.57735,-0.57735,1],[0.57735,-0.57735,1],[0.57735,0.57735,1],[-0.57735,0.57735,1]])
-    GPs_Ws = np.array([[-1/(3**(1/2)),-1/(3**(1/2)),1],[1/(3**(1/2)),-1/(3**(1/2)),1],[1/(3**(1/2)),1/(3**(1/2)),1],[-1/(3**(1/2)),1/(3**(1/2)),1]])
+class Switcher(object):
+          def indirect(self,i):
+                   method_name='Gauss_'+str(i)
+                   method=getattr(self,method_name,lambda :'Invalid')
+                   return method()
+          def Gauss_0(self):
+                   return np.array([[0],[2]])
+          def Gauss_1(self):
+                   return np.array([[0.5773,-0.5773],[1.0,1.0]])
+          def Gauss_2(self):
+                   return np.array([[0.7746,-0.7746,0.0],[0.5556,0.5556,0.8889]])
+          def Gauss_3(self):
+                   return np.array([[0.8611,-0.8611,0.3399,-0.3399],[0.3478, 0.3478,0.6521,0.6521]])
 
-else:
-    GPs_Ws = np.array([[0.7746,0.7746,0.2743],[0.7746,-0.7746,0.2743],[0.7746,0.,0.4390],[-0.7746,0.7746,0.2743],
-                        [-0.7746,-0.7746,0.2743],[-0.7746,0.,0.4390],[0.,0.7746,0.4390],[0.,-0.7746,0.4390],[0.,0.,0.7023]])
+def GaussPoints(p,q):
+    GaussMatrix=np.zeros(((p+1)*(q+1),3))
+    s=Switcher()
+    GaussPoints_xi  = s.indirect(p)
+    GaussPoints_eta = s.indirect(q)
+    print(GaussPoints_xi)
+    print(GaussPoints_eta)
+    k=0
+    for i in range(p+1):
+        for j in range(q+1):
+            GaussMatrix[k,0]= GaussPoints_xi[0,i]
+            GaussMatrix[k,1]= GaussPoints_eta[0,j]
+            GaussMatrix[k,2]= GaussPoints_xi[1,i] * GaussPoints_eta[1,j]
+            k+=1       
+    return GaussMatrix
+
+GPs_Ws = GaussPoints(p,q)
+
+# if(p==1 and q==1):
+#     #GPs_Ws = np.array([[-0.57735,-0.57735,1],[0.57735,-0.57735,1],[0.57735,0.57735,1],[-0.57735,0.57735,1]])
+#     GPs_Ws = np.array([[-1/(3**(1/2)),-1/(3**(1/2)),1],[1/(3**(1/2)),-1/(3**(1/2)),1],[1/(3**(1/2)),1/(3**(1/2)),1],[-1/(3**(1/2)),1/(3**(1/2)),1]])
+
+# else:
+#     GPs_Ws = np.array([[-1/(3**(1/2)),-1/(3**(1/2)),1],[1/(3**(1/2)),-1/(3**(1/2)),1],[1/(3**(1/2)),1/(3**(1/2)),1],[-1/(3**(1/2)),1/(3**(1/2)),1]])
+
+#     # GPs_Ws = np.array([[0.7746,0.7746,0.2743],[0.7746,-0.7746,0.2743],[0.7746,0.,0.4390],[-0.7746,0.7746,0.2743],
+#     #                     [-0.7746,-0.7746,0.2743],[-0.7746,0.,0.4390],[0.,0.7746,0.4390],[0.,-0.7746,0.4390],[0.,0.,0.7023]])
 
 p_ord=p+1 #order of the curve in xi direction
 q_ord=q+1 #order of the curve in eta direction
@@ -44,7 +78,7 @@ for j in range(ncpeta):
         P_W[j,i,0] = (Length/(ncpxi-1))*i
         P_W[j,i,1] = (Height/(ncpeta-1))*j
         P_W[j,i,2] = 0
-        P_W[j,i,3] = 1                      # Weights for respective control points
+        P_W[j,i,3] = 1                     # Weights for respective control points
 print(P_W)
 
 # Input control point vector to element routine as a transpose

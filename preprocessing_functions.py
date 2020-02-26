@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#----------------------------One Program for any degree curve-----------------------------------#
+#------------------------------------------26 Feb-----------------------------------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -378,8 +378,8 @@ def NURBS_Surface_Point(n,p,U,m,q,V,Pw,u,v):
             for i in range(p+1):
                 Sw = Sw + Nu[i]*Nv[j]*Pw[uspan-p+i][vspan-q+j][d]
         S[d]=Sw   
-    #surface_point=S[:-1]/S[-1]
-    surface_point=S[:-1]
+    #surface_point=S[:-1]
+    surface_point=S[:-1]/S[-1]
     return surface_point
 
 #----------------------------Test Case 1-----------------------------#
