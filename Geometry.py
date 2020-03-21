@@ -9,8 +9,8 @@ np.set_printoptions(threshold=np.inf)
 #----------Manually change below variables--------------#
 
 #------------------------------------Degree of the curve----------------------------------------#
-p=2 #Degree of the curve in xi direction
-q=2 #Degree of the curve in eta direction
+p=1 #Degree of the curve in xi direction
+q=1 #Degree of the curve in eta direction
 
 #-----------------------------------Dimentions of 2D Plate--------------------------------------#
 Thick   = 1.0 #Thickness of the plate
@@ -18,8 +18,8 @@ Length  = 10.0
 Height  = 10.0
 
 #------------------Number of Control points in xi and eta direction-----------------------------#
-ncpxi    = 3 # No.of control points in xi  direction
-ncpeta   = 3 # No.of control points in eta direction
+ncpxi    = 2 # No.of control points in xi  direction
+ncpeta   = 2 # No.of control points in eta direction
 
 class Switcher(object):
           def indirect(self,i):
@@ -79,6 +79,16 @@ for j in range(ncpeta):
         P_W[j,i,1] = (Height/(ncpeta-1))*j
         P_W[j,i,2] = 0
         P_W[j,i,3] = 1                     # Weights for respective control points
+# P_W=np.array([[[0.,0.,0.,1.5],[2.,0.,0.,0.5],[4.,0.,0.,3],[6.,0.,0.,0.5],[8.,0.,0.,1.7]],
+#             [[0.,2.,0.,1.],[2.,2.,0.,0.5],[4.,2.,0.,3],[6.,2.,0.,0.2],[8.,2.,0.,1.5]],
+#             [[0.,4.,0.,1.5],[2.,4.,0.,0.1],[4.,4.,0.,10],[6.,4.,0.,0.5],[8.,4.,0.,5.]],
+#             [[0.,6.,0.,1.],[2.,6.,0.,0.5],[4.,6.,0.,0.01],[6.,6.,0.,0.8],[8.,6.,0.,1.]],
+#             [[0.,8.,0.,0.1],[2.,8.,0.,0.5],[4.,8.,0.,3],[6.,8.,0.,0.8],[8.,8.,0.,0.5]]])
+
+#----------------------Control points for Quater circle with a hole-----------------------#
+# P_W=np.array([[[1.,0.,0.,1],[0.853553,0.353553,0.,0.853553],[0.353553,0.853553,0.,0.853553],[0.,1.,0.,1]],
+#             [[2.5,0.,0.,1.],[2.5,0.75,0.,1.],[0.75,2.5,0.,1.],[0.,2.5,0.,1.]],
+#             [[4,0.,0.,1.],[4,4.,0.,1.],[4.,4.,0.,1.],[0.,4.,0.,1.]]])
 print(P_W)
 
 # Input control point vector to element routine as a transpose

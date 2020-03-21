@@ -52,8 +52,8 @@ print(Right_nodes_e)
 #---------------------Boundary Conditions-------------------------#
 
 #-------------Displacement Loading-------------#
-U_g_0[Right_nodes_u]  = 0.1
-U_g_0[Top_nodes_u]    = 0.2
+#U_g_0[Right_nodes_u]  = 0.1
+#U_g_0[Top_nodes_u]    = 0.2
 
 #---------------Displacement BCS---------------#
 U_g_0[Bottom_nodes_u] = 0
@@ -64,8 +64,9 @@ U_g_0[Left_nodes_e]   = 0
 
 #----------------Electrical Loading----------------#
 #U_g_0[Right_nodes_e]  = 500000000
+U_g_0[11]  = 1000
 
 #-------------Replace this every time-----------------------#
-BCS=np.sort(np.concatenate((Bottom_nodes_u,Left_nodes_u,Right_nodes_u,Top_nodes_u,Left_nodes_e)))
+BCS=np.sort(np.concatenate((Bottom_nodes_u,Left_nodes_u,Left_nodes_e,[11])))
 #print(BCS)
 #print(U_g_0)

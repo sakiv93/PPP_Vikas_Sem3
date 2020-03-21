@@ -199,26 +199,26 @@ P_W_new_T = P_W_new.transpose((1,0,2))
 
 
 # #------------------------Plotting--------------------------#
-# x_positions=np.linspace(U[0],(U[-1]),ncpxi)
-# #print('x_positions',x_positions)
-# y_positions=np.linspace(V[0],(V[-1]),ncpeta)
-# surface=np.zeros((np.size(x_positions),np.size(y_positions),3))
-# for i,u in enumerate(x_positions):
-#     for j,v in enumerate(y_positions):
-#         # Here send input as displaced positions of control points matrix i.e P_new = P + U
-#         S_r = NURBS_Surface_Point(n,p,U,m,q,V,P_W_new_T,u,v)
-#         surface[i,j]=S_r
-# #Surface generated will be a transpose of what is desired since 
-# #NURBS_Surface_Point algorithm is modelled in such a way so a transpose is required.
-# surface = surface.transpose((1,0,2)) 
-# #print(np.shape(surface))
-# #print('Surface',surface)
-# X=surface[:,:,0]
-# #print('Y',Y)
-# Y=surface[:,:,1]
-# print('X',X)
-# #print('X',X)
-# #print('Y',Y)
+x_positions=np.linspace(U[0],(U[-1]),ncpxi)
+#print('x_positions',x_positions)
+y_positions=np.linspace(V[0],(V[-1]),ncpeta)
+surface=np.zeros((np.size(x_positions),np.size(y_positions),3))
+for i,u in enumerate(x_positions):
+    for j,v in enumerate(y_positions):
+        # Here send input as displaced positions of control points matrix i.e P_new = P + U
+        S_r = NURBS_Surface_Point(n,p,U,m,q,V,P_W_new_T,u,v)
+        surface[i,j]=S_r
+#Surface generated will be a transpose of what is desired since 
+#NURBS_Surface_Point algorithm is modelled in such a way so a transpose is required.
+surface = surface.transpose((1,0,2)) 
+#print(np.shape(surface))
+#print('Surface',surface)
+X=surface[:,:,0]
+#print('Y',Y)
+Y=surface[:,:,1]
+#print('X',X)
+#print('X',X)
+#print('Y',Y)
 
 
 # #------------------U1 Plotting----------------------#
@@ -260,69 +260,85 @@ P_W_new_T = P_W_new.transpose((1,0,2))
 # ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'RF2')
 # #---------------------------------------------------#
 
-# # #-----------------Plotting Electrical Potential Calculations-----------------#
-# # EPOT=U_g_0[nudof*ncp:(nudof*ncp+nedof*ncp)]
-# # EPOT=EPOT.reshape((ncpeta,ncpxi))
-# # print('EPOT',EPOT)
-# # #----------------------------------------------------------------------------#
+#-----------------Plotting Electrical Potential Calculations-----------------#
+EPOT=U_g_0[nudof*ncp:(nudof*ncp+nedof*ncp)]
+EPOT=EPOT.reshape((ncpeta,ncpxi))
+print('EPOT',EPOT)
+#----------------------------------------------------------------------------#
 
-# # #-----------------Plotting Electrical Potential -----------------------------#
-# # fig,ax=plt.subplotsj()
-# # level = np.linspace(np.amin(EPOT),np.amax(EPOT),13)
-# # plt.contourf(X, Y, EPOT,levels=level,cmap='jet')
-# # plt.colorbar()
-# # ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'EPOT')
-# # #----------------------------------------------------------------------------#
-
-
-
-# # #--------------Plotting Electrical Reaction Forces Calculations---------------#
-# # Electrical_RF = F_g_int[nudof*ncp:(nudof*ncp+nedof*ncp)]
-# # Electrical_RF = Electrical_RF.reshape((ncpeta,ncpxi))
-# # print('Electrical_RF',Electrical_RF)
-# # #-----------------------------------------------------------------------------#
-
-# # #-----------------Plotting Electrical Reaction Forces-------------------------#
-# # fig,ax=plt.subplots()
-# # level = np.linspace(np.amin(Electrical_RF),np.amax(Electrical_RF),13)
-# # plt.contourf(X, Y, Electrical_RF,levels=level,cmap='jet')
-# # plt.colorbar()
-# # ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'Electrical_RF')
-# # #-----------------------------------------------------------------------------#
+#-----------------Plotting Electrical Potential -----------------------------#
+fig,ax=plt.subplots()
+level = np.linspace(np.amin(EPOT),np.amax(EPOT),13)
+plt.contourf(X, Y, EPOT,levels=level,cmap='jet')
+plt.colorbar()
+ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'EPOT')
+#----------------------------------------------------------------------------#
 
 
 
-
-#------------------------Plotting--------------------------#
-x_positions=np.linspace(U[0],(U[-1]),20)
-#print('x_positions',x_positions)
-y_positions=np.linspace(V[0],(V[-1]),20)
-surface=np.zeros((np.size(x_positions),np.size(y_positions),3))
-for i,u in enumerate(x_positions):
-    for j,v in enumerate(y_positions):
-        # Here send input as displaced positions of control points matrix i.e P_new = P + U
-        S_r = NURBS_Surface_Point(n,p,U,m,q,V,P_W_new_T,u,v)
-        surface[i,j]=S_r
-#Surface generated will be a transpose of what is desired since 
-#NURBS_Surface_Point algorithm is modelled in such a way so a transpose is required.
-surface = surface.transpose((1,0,2)) 
-#print(np.shape(surface))
-#print('Surface',surface)
-X=surface[:,:,0]
-print('X',X)
-Y=surface[:,:,1]
-print('Y',Y)
-#print('X',X)
-#print('Y',Y)
-Z=np.zeros_like(X)
+#--------------Plotting Electrical Reaction Forces Calculations---------------#
+Electrical_RF = F_g_int[nudof*ncp:(nudof*ncp+nedof*ncp)]
+Electrical_RF = Electrical_RF.reshape((ncpeta,ncpxi))
+print('Electrical_RF',Electrical_RF)
+#-----------------------------------------------------------------------------#
 
 #-----------------Plotting Electrical Reaction Forces-------------------------#
 fig,ax=plt.subplots()
-#level = np.linspace(np.amin(Electrical_RF),np.amax(Electrical_RF),13)
-plt.contourf(X, Y, Z,cmap='jet')
+level = np.linspace(np.amin(Electrical_RF),np.amax(Electrical_RF),13)
+plt.contourf(X, Y, Electrical_RF,levels=level,cmap='jet')
 plt.colorbar()
-ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'Z')
+ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'Electrical_RF')
 #-----------------------------------------------------------------------------#
+
+
+
+
+# #------------------------Plotting--------------------------#
+# x_positions=np.linspace(U[0],(U[-1]),30)
+# #print('x_positions',x_positions)
+# y_positions=np.linspace(V[0],(V[-1]),10)
+# surface=np.zeros((np.size(x_positions),np.size(y_positions),3))
+# surface_init=np.zeros((np.size(x_positions),np.size(y_positions),3))
+# for i,u in enumerate(x_positions):
+#     for j,v in enumerate(y_positions):
+#         # Here send input as displaced positions of control points matrix i.e P_new = P + U
+#         S_r_init = NURBS_Surface_Point(n,p,U,m,q,V,P_W_T,u,v)
+#         surface_init[i,j]=S_r_init
+#         S_r = NURBS_Surface_Point(n,p,U,m,q,V,P_W_new_T,u,v)
+#         surface[i,j]=S_r
+# #Surface generated will be a transpose of what is desired since 
+# #NURBS_Surface_Point algorithm is modelled in such a way so a transpose is required.
+# surface = surface.transpose((1,0,2))
+# surface_init = surface_init.transpose((1,0,2))
+# #print(np.shape(surface))
+# #print('Surface_init',surface_init)
+# X=surface[:,:,0]
+# X_init=surface_init[:,:,0]
+# #print('X',X)
+# Y=surface[:,:,1]
+# Y_init=surface_init[:,:,1]
+# #print('Y',Y)
+# #print('X',X)
+# #print('Y',Y)
+# Z=np.zeros_like(X)
+
+# #-----------------Plotting Initial Surface with NURBS different weights-------------------------#
+# fig,ax=plt.subplots()
+# #level = np.linspace(np.amin(Electrical_RF),np.amax(Electrical_RF),13)
+# plt.contourf(X_init, Y_init, Z,cmap='jet')
+# plt.colorbar()
+# ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'Z_init')
+# plt.xlim(-1,5)
+# plt.ylim(-1,5)
+# #-----------------------------------------------------------------------------#
+
+# #-----------------Plotting Deformed Surface with NURBS different weights-------------------------#
+# fig,ax=plt.subplots()
+# #level = np.linspace(np.amin(Electrical_RF),np.amax(Electrical_RF),13)
+# plt.contourf(X, Y, Z,cmap='jet')
+# plt.colorbar()
+# ax.set(xlabel = 'x [$mm$]', ylabel = 'y [$mm$]', title= 'Z')
+# #-----------------------------------------------------------------------------#
 
 
 

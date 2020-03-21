@@ -1,4 +1,4 @@
-\documentclass[12pt]{article}
+\documentclass[11pt]{article}
 
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -19,6 +19,7 @@
 \usepackage{tabu}
 \usepackage{enumitem,kantlipsum}
 \usepackage{verbatim}
+\usepackage{hyperref}
 \begin{document}
 \begin{titlepage}
 	\centering
@@ -29,6 +30,8 @@
 		\end{center}
 		
 	\end{figure}
+	
+
 	
 	
 	
@@ -54,14 +57,13 @@
 \end{titlepage}
 
 \clearpage
-\textbf{\LARGE Abstract}\\ \newline
-\newline
-
 
 \newpage
 \clearpage
 \tableofcontents
 \clearpage
+
+\vspace*{1cm}
 
 \section{Introduction}
 Among all the numerical methods Finite Element Methods (FEM) are more popularly
@@ -71,53 +73,76 @@ smaller geometries called elements. Such geometrical approximations may create
 numerical errors and seriously effect the accuracy of the solution.
 Isogeometric analysis (IGA) is a technique to generate geometry using CAD
 concept of Non Uniform Rational B-Splines (NURBS) and analyse using its basis
-functions. !The pioneers of this technique are Tom Hughes and his group at The
-University of Texas at Austin!.
+functions.
+With the use of NURBS basis functions instead of Lagrangian basis functions the geometry is captured exactly for the analysis and rules out the possibility of the geometrical errors. Moreover, the time from design to analysis phase is greatly reduced saving the cost and time for the industry.
+The IGA technique is firstly pioneered by Tom Hughes and his group at The
+University of Texas at Austin.\\
+\par
+The present programming project aims at writing a python code to implement IGA for piezoelectric materials which involves electro-mechanical coupling. The coding work involves writing functions for 2D NURBS geometry generation, analysis with different load conditions and post processing of the results using contour plots. The pure mechanical case, electrical case and electro-mechanical coupling has been analysed and results are verified using abaqus results. Comparing the IGA program generated results with abaqus elements output is justified because of the fact that IGA aims at reducing the approximation from traditional FEM proceduers.      
+
+
+\newpage
 
 
 \subsection{Advantages of IGA over FEA}
 \begin{description}[leftmargin=*]
 	\item[$\bullet$]   The exact representation of the geometry for analysis rules
 	out the possibility of geometrical approximations.
-	\item[$\bullet$]   A huge amount of time involved in finite element modelling
+	\item[$\bullet$]   A huge amount of time and effort involved in finite element modelling
 	can be avoided.
 \end{description}
 
-\section{B-Splines } \label{BSplines}
+\section{B-Splines } \label{B_Spline}
 In this section a brief description of B-Splines is discussed since NURBS is an
 extended version of B-Splines. A B-Spline basis function is defined by its order
 and knot vectors. A B-spline basis function along with control points defines a
-B-Spline curve.
+B-Spline curve. A surface or volume can be generated using a curve by tensor product between basis functions which will be discussed in detail in the future sections. 
+\begin{figure}[H]
+	\begin{center}
+		\includegraphics[scale=0.8]{B_Spline.png} 
+		\caption{\\A B-Spline curve with six control points}\label{B_Spline}
+	\end{center}	
+\end{figure}
 \subsection{Order }
 For a point on a B-Spline curve the order of the basis function speaks about the
 number of nearby control points influence the given point. The degree $p$ of the
 basis function is one less than the order of the curve.
+The following figure shows a B-Spline curve with same number and position of control points but with different orders.
+\begin{figure}[H]
+	\begin{center}
+		\includegraphics[scale=0.8]{DegreeBspline.png} 
+		\caption{\\B-Spline curves with same control points but different order}\label{DegreeBspline}
+	\end{center}	
+\end{figure}
 
-\subsection{Knot vector }
+\subsection{Knot vector } \label{KnotVectorSection}
 A knot vector is an array with an ascending order of parameter values written as
-$\Xi = \{ \xi_0,\xi_1,\xi_2.....,\xi_{n+p}\}$.
-!The knot vector is a sequence of parameter values that determines where and how
-the control points affect the NURBS curve. The number of knots is always equal
-to the number of control points plus curve degree plus one (i.e. number of
-control points plus curve order). The knot vector divides the parametric space
-in the intervals mentioned before, usually referred to as knot spans. Each time
-the parameter value enters a new knot span, a new control point becomes active,
-while an old control point is discarded. It follows that the values in the knot
-vector should be in nondecreasing order, so (0, 0, 1, 2, 3, 3) is valid while
-(0, 0, 2, 1, 3, 3) is not.(WIKI)!
+$\Xi = \{ \xi_0,\xi_1,\xi_2.....,\xi_{n+p}\}$
+($\xi_i$ is called $ith$ knot), with $n+1$ basis functions which will be discussed in later sections.
+The number of knots in a knot vector is equal to the summation of degree of the curve and total number of control points defining the curve. 
+B-Spline curves are defined in parametric space which is divided by knot spans. 
+Knot vector should be an ascending order of knots. For example $\{0,0,1,1,2,3,3\}$ is valid but not $\{0,0,1,2,3,2,3\}$.
+There is no difference between $\Xi = \{0,0,0,1,2,3,4,4,4\}$ and $\Xi = \{0,0,0,1/4,2/4,3/4,1,1,1\}$ which can be seen from Fig.(\ref{SameKnotVector}) because the latter can be obtained by dividing the former by 4.
+\begin{figure}[H]
+	\begin{center}
+		\includegraphics[scale=0.8]{SameKnotVector.png} 
+		\caption{\\B-Spline curves showing same trend with different Knot Vectors}\label{SameKnotVector}
+	\end{center}	
+\end{figure}
+The effect of the control points on a B-Spline curve is completely defined by knot vector parameter values as shown in Fig.(\ref{DifferentKnotVector})
+\begin{figure}[H]
+	\begin{center}
+		\includegraphics[scale=0.8]{DifferentKnotVector.png} 
+		\caption{\\B-Spline curves with same control points but with different Knot vectors}\label{DifferentKnotVector}
+	\end{center}	
+\end{figure}
 
 \subsection{Control points }
-!The control points determine the shape of the curve.[8] Typically, each point
-of the curve is computed by taking a weighted sum of a number of control points.
-The weight of each point varies according to the governing parameter. For a
-curve of degree d, the weight of any control point is only nonzero in d+1
-intervals of the parameter space. Within those intervals, the weight changes
-according to a polynomial function (basis functions) of degree d. At the
-boundaries of the intervals, the basis functions go smoothly to zero, the
-smoothness being determined by the degree of the polynomial.(WIKI)! The total
+The co-ordinates and number of the control points determine the shape of the curve and the shape can be varied by altering the knot values in knot vector as discussed in section (\ref{KnotVectorSection}).
+A span on the B-Spline curve is controlled by $p+1$ number of points.
+The total
 number of control points is given by $n_{cp}(\xi)$ = total number of knots in
-$[\Xi] - (p+1)$. *****
-
+$[\Xi] - (p+1)$. For an $pth$ degree curve atleast $p+1$ control points have to be defined.  
 
 
 \subsection{B-Spline basis functions }
@@ -147,8 +172,16 @@ N_{i,0}(\xi) =
 	\item Basis functions sum upto to unity $\sum_{i=0}^{n} N_{i,p}(\xi) =1$
 	\item Basis functions are non-negative $ N_{i,p}(\xi) \geq 0$ over the entire
 	domain
-	\item********** Write more*********** 
 \end{enumerate}
+
+\begin{figure}[H]
+	\begin{center}
+		\includegraphics[scale=0.7]{BSplineBasisFunctions.png} 
+		\caption{\\Second degree B-Spline functions with a uniform knot vector  }\label{BSplineBasisFunctions}
+	\end{center}	
+\end{figure}
+
+ 
 
 \subsubsection{Derivatives }
 The first derivative of a B-Spline basis function with its variable $\xi$ is
@@ -178,6 +211,12 @@ curves along each parametric direction ($\xi,\eta$). It requires knot vectors
 ($\Xi = \{ \xi_0,\xi_1,\xi_2.....,\xi_{n+p}\}$,$H =
 \{\eta_0,\eta_1,\eta_2.....,\eta_{m+q}\}$) along each parametric direction and
 control net $P_{i,j}$
+\begin{figure}[H]
+	\begin{center}
+		\includegraphics[scale=0.7]{B_Spline_Surface.png} 
+		\caption{\\A B-Spline surface with control points net}\label{B_Spline_Surface}
+	\end{center}	
+\end{figure}
 
 
 \begin{equation} \label{BSplineSurface}
@@ -190,6 +229,7 @@ p,q are the degrees of the B-Spline basis functions along $\xi,\eta$
 respectively and n,m are number of control points along $\xi,\eta$ respectively.
 \noindent
 Eq. (\ref{BSplineSurface}) can be compactly written as
+
 
 \begin{equation} \label{BSplineSurface}
 S(\xi,\eta) = \sum_{i=0}^{n}\sum_{j=0}^{m} N_{i,j}^{p,q}(\xi,\eta) P_{i,j}
@@ -207,19 +247,6 @@ co-ordinates is given as
 \frac{\partial N_{i,j}^{p,q}(\xi,\eta)}{\partial \eta} = \frac{d}{d\eta}
 \bigg(N_{j,q}(\eta)\bigg)N_{i,p}(\xi)
 \end{equation}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 \section{Non Uniform Rational B-Splines } \label{NURBS}
@@ -240,6 +267,13 @@ where $N_{i,p}(\xi)$ is the $i$th B-Spline basis function with order p and
 $w_{i}$ denotes weight of the $i$th control point ($P_i$). ***** Explain weights
 with help of an example****. When $w_{i} = constant \quad \forall i$ the NURBS
 basis function reduces to B-Spline basis function.
+\\The usage of weights can be illustrated in Fig.(\ref{WeightsCircles}). The same circle can be drawn with different number of control points by altering their weights.
+\begin{figure}[H]
+	\begin{center}
+		\includegraphics[scale=1.0]{WeightsCircles.png} 
+		\caption{\\NURBS circle with different control points and weights}\label{WeightsCircles}
+	\end{center}	
+\end{figure}
 \subsubsection{Derivatives}
 The first derivative of a NURBS basis function with its variable $\xi$ is given
 by
@@ -268,7 +302,22 @@ in short form
 \begin{equation}
 C(\xi) = \sum_{i=0}^{n}R_{i,p}(\xi)P_{i}
 \end{equation}
-refer NURBS book and write more info
+*****refer NURBS book and write more info*****\\
+A NURBS curve with different weights on control points along with its basis function is shown in Fig.(\ref{NURBSCurveBasisFunctions})
+\begin{figure}[H]
+	\begin{center}
+		\includegraphics[scale=0.7]{NURBSCurveBasisFunctions.png} 
+		\caption{\\$\Xi=\{0,0,0,0,1,2,3,4,4,4,4\}, w = \{1,1,1,3,1,1,1\}$\\(a) A third degree NURBS curve; (b) Associated NURBS basis functions}\label{NURBSCurveBasisFunctions}
+	\end{center}	
+\end{figure}
+\subsubsection{Properties }
+\begin{enumerate}
+	\item NURBS basis functions sum upto to unity $\sum_{i=0}^{n} R_{i,p}(\xi) =1$
+	\item NURBS basis functions are non-negative $ R_{i,p}(\xi) \geq 0$ over the entire
+	domain
+	\item $R_{0,p}(0)=R_{n,p}(1)=1$
+	\item For $w_i=1$ for all $i$, NURBS basis functions $R_i(\xi)$ reduces B-Spline basis functions $N_i(\xi)$ 
+\end{enumerate}
 \subsection{NURBS Surfaces and solids }
 NURBS Surfaces and solids are generated by the tensor product between NURBS
 curve basis functions.
@@ -339,15 +388,22 @@ This section describes step-by-step implementation of the Isogeometric analysis.
 A modified FEM code structure can be used to implement IGA. Similar to FEM, IGA
 can be divided into pre-processing, processing and post-processing stages. The
 stages in an IGA analysis is shown with the help of an flow chart
-(\ref{FlowChart1})
+(Fig.\ref{PreProcessing})
 
-
+\begin{figure}[H]
+	\begin{center}
+		\includegraphics[scale=0.4]{PreProcessing.png} 
+		\caption{\\Flow chart describing Pre-processing Stage of IGA}\label{PreProcessing}
+	\end{center}
+	
+\end{figure}
 \subsection{Pre-processing Stage of the Analysis}
 This subsection mainly deals with NURBS based geometry creation, types of
 assembly arrays needed to assemble discretized geometries and how to deal with
 homogeneous and non-homogeneous boundary conditions on boundary defining control
 points due to their higher ($C^{p-1}$) continuity unlike $C^{0}$ continuity of
 FEM nodes. 
+
 \subsubsection{Geometry Creation}
 As mentioned before in the section \ref{NURBS}, the construction of NURBS
 discretized geometry requires parametric details such as control points, knot
@@ -373,7 +429,7 @@ connectivity array are required.
 	***This can be illustrated with an example below
 \end{enumerate}
 \subsubsection{Boundary Conditions}
-***Have to write 
+A brief description on how to define boundary conditions (BCS) is described in this section. When the number of control points in each element in each direction equals the degree of the curve plus one in respective direction, a traditional way of defining homogeneous and inhomogeneous boundary conditions can be followed. In any other case a special treatment for defining BCS have to be followed which is not in the scope of this project. Procedures like least square minimization method are usually adopted for this purpose. 
 
 
 \subsection{Processing Stage of the Analysis}
@@ -483,10 +539,17 @@ number of Gauss points and their respective Gauss weights.\\
 \noindent
 The formulated global stiffness matrix and force vector are solved using
 numerical scheme like Newton-Raphson method for the solution field.
+\\A flow chart describing processing stage flow is shown in Fig.(\ref{Processing})
+\begin{figure}[H]
+	\begin{center}
+		\includegraphics[scale=0.7]{Processing.png} 
+		\caption{\\Flow chart describing Processing Stage of IGA}\label{Processing}
+	\end{center}
+\end{figure}
 
 \subsection{Post-processing Stage of the Analysis}
 This section deals with visualization of the deformed geometry and how a
-displacement and stress fields are plotted. 
+displacement and solution dependent variables are plotted. 
 
 \begin{enumerate}[leftmargin=*]
 	\item Visualization of the deformed NURBS geometry:
@@ -501,16 +564,17 @@ displacement and stress fields are plotted.
 	$[\textbf{P}^{new}]$ control points array is used to plot the deformed
 	geometry.
 	
-	\item Plotting of displacement and stress fields:
+	\item Plotting of displacements and solution dependent variables:
 	
-	*** Have to write
+	A contour plot can be made using the displacement values ($U$) on deformed or undeformed geometry.
+	Due to the higher continuity of the NURBS basis functions stress recovery techniques are not necessary to extract solution field on the deformed geometry.  
+	
 \end{enumerate}
 
 \begin{figure}[H]
 	\begin{center}
-		\includegraphics[scale=0.7]{FlowChart_cropped.png} 
-		\caption{\\Flow chart describing Pre-processing, Processing and
-			Post-processing Stage of IGA}\label{FlowChart1}
+		\includegraphics[scale=0.5]{PostProcessing.png} 
+		\caption{\\Flow chart describing Post-processing Stage of IGA}\label{PostProcessing}
 	\end{center}
 	
 \end{figure}
@@ -604,7 +668,7 @@ R_{1,z} &0 & R_{1,x} & R_{2,z} &0 & R_{2,x} & .... &R_{n_{cp}^e,z} &0
 \end{bmatrix}
 \end{equation}
 By substituting Eqs, (\ref{u_and_du}) and (\ref{BMatrix}) in
-Eq.(\ref{FinalWeakform}) the weak form in matrix terms can be written as
+Eq.(\ref{FinalWeakform}), the weak form in matrix terms can be written as
 \begin{equation} \label{MatrixWeakForm}
 \sum_{e=1}^{nel} \left[ \left( \int_{\Omega_e} \textbf{B}^T \textbf{C}
 \textbf{B} d\Omega \right) \right] \textbf{u} = \int_{\Gamma^e_t}
@@ -859,6 +923,7 @@ The movement of bottom edge is fixed in y direction and left edge in x direction
 	\end{minipage}
 \end{figure}
 \subsubsection{Parametric details for the plate with single element}
+\label{ParametricDeatils1Elem}
 The 2nd order NURBS curve is used in both $\xi$ and $\eta$ directions. \\
 \begin{comment}
 The knot vectors along $\xi$ and $\eta$ directions are \\
@@ -922,20 +987,23 @@ $n_{cp}$ = $n_{cp}(\xi) * n_{cp}(\eta)$ which is $2*2 = 4$. \\
 	assembly array and knot vector connectivity matrix.
 \end{enumerate}
 \subsubsection{Results and discussions}
-Abaqus plane strain full integration piezoelectric element (\textbf{CPE4}) is used for analysis. The below figures shows the values of displacements (U), electrical potentials (EPOT) and reaction forces (RF ) for both abaqus and IGA element.\\
+Abaqus plane strain full integration element (\textbf{CPE4}) is used for analysis (CPE4 element is used to verify Program generated IGA results). 
+\\The below figures shows the values of displacements (U) and reaction forces (RF ) for both abaqus and IGA element.\\
+\newpage
+\textbf{**A similar contour is used for the program generated results and abaqus results for an easy comparison. }\\
 Figure(\ref{M1U1}) and Figure(\ref{M1U1_IGA}) shows the displacement (U1) values of the single CPE4 element and single IGA element at 100 \% loading in x direction respectively. \\
 \begin{figure}[H]
 	\centering
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{M1U1.png}
-		\captionof{figure}{CPE4 Element:U1}
+		\captionof{figure}{CPE4 Element:U1 \\Abaqus generated result}
 		\label{M1U1}
 	\end{minipage}%
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{M1U1_IGA.png}
-		\captionof{figure}{IGA Element:U1}
+		\captionof{figure}{IGA Element:U1 \\ Program generated result}
 		\label{M1U1_IGA}
 	\end{minipage}
 \end{figure}
@@ -970,6 +1038,9 @@ Figure(\ref{M1U2}) and Figure(\ref{M1U2_IGA}) shows the displacement (U2) values
 		\label{M1U2_IGA}
 	\end{minipage}
 \end{figure}
+
+\newpage
+
 Figure(\ref{M1RF1}) and Figure(\ref{M1RF1_IGA}) shows the Reaction force values (RF1) of the single CPE4 element and single IGA element at 100 \% loading in x direction respectively. \\
 \begin{figure}[H]
 	\centering
@@ -1010,12 +1081,94 @@ As shown in figures above the values generated by IGA code are inline with the r
 
 
 
+\subsection{2D Plate with pure Electrical loading}
+\subsubsection{Problem description}
+A 2D plate is subjected to Electrical loading as shown in Figure(\ref{PureElectrical}).The properties of the material are, Young’s modulus E = 210GPa and Poisson's ratio $\nu$ = 0.3.
+The dielectric constants for the material are
+$$
+\varepsilon = \begin{bmatrix}
+6.752E-12 & 0 & 0 \\
+0 & 5.872E-12 & 0 \\
+0 & 0 & 6.752E-12\\
+\end{bmatrix} C/(V mm)
+$$ 
+The movement of bottom edge is fixed in y direction and left edge in x direction. An electrical potential V of 1000 volts (***Check units) is applied at one node as shown in Fig.(\ref{PureElectrical})
+\begin{figure}[H]
+	\centering
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\includegraphics[width=0.8\linewidth]{2DPlate.png}
+		\captionof{figure}{2D Plate}
+		\label{2Dplate}
+	\end{minipage}%
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\includegraphics[width=1\linewidth]{PureElectrical.png}
+		\captionof{figure}{2D Plate with pure electrical loading}
+		\label{PureElectrical}
+	\end{minipage}
+\end{figure}
+\subsubsection{Parametric details for the plate with single element}
 
 
+The parametric details for the geometry are the same as in section \hyperref[ParametricDeatils1Elem]{\ref{ParametricDeatils1Elem}}
+
+\subsubsection{Results and discussions}
+Abaqus plane strain full integration element (\textbf{CPE4}) is used for analysis (CPE4 element is used to verify Program generated IGA results). 
+\\The below figures shows the values of Electrical potentials (EPOT) and reactive electrical nodal charge (RCHG) for both abaqus and IGA element.\\
 
 
+\textbf{**A similar contour is used for the program generated results and abaqus results for an easy comparison. }\\
+Figure(\ref{E1EPOT}) and Figure(\ref{E1EPOT_IGA}) shows the Electrical potential (EPOT) values of the single CPE4 element and single IGA element at 100 \% loading respectively. \\
+\begin{figure}[H]
+	\centering
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\includegraphics[width=1\linewidth]{E1EPOT.png}
+		\captionof{figure}{CPE4 Element:U1 \\Abaqus generated result}
+		\label{E1EPOT}
+	\end{minipage}%
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\includegraphics[width=1\linewidth]{E1EPOT_IGA.png}
+		\captionof{figure}{IGA Element:U1 \\ Program generated result}
+		\label{E1EPOT_IGA}
+	\end{minipage}
+\end{figure}
+\begin{comment}
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.45]{xyz.png} 
+\caption{\\CPE4 Element U1}\label{xyz}
+\end{center}	
+\end{figure}
 
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.8]{Figure_1.png} 
+\caption{\\IGA Element U1}\label{Figure_1}
+\end{center}	
+\end{figure}
+\end{comment}
+Figure(\ref{E1RCHG}) and Figure(\ref{E1RCHG_IGA}) shows the reactive nodal charge (RCHG) values of the single CPE4 element and single IGA element at 100 \% loading respectively. \\
+\begin{figure}[H]
+	\centering
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\includegraphics[width=1\linewidth]{E1RCHG.png}
+		\captionof{figure}{CPE4 Element:U2}
+		\label{E1RCHG}
+	\end{minipage}%
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\includegraphics[width=1\linewidth]{E1RCHG_IGA.png}
+		\captionof{figure}{IGA Element:U2}
+		\label{E1RCHG_IGA}
+	\end{minipage}
+\end{figure}
 
+\subsubsection{Conclusion}
+As shown in figures above the values generated by IGA code are inline with the results of Abaqus element. So it can be concluded that IGA code written works fine for 2D one element case.
 
 
 
@@ -1081,7 +1234,10 @@ sections. \\
 The results generated by IGA code is compared with inbuilt Abaqus piezoelectric
 element.
 \subsubsection{Results and discussions}
-Abaqus plane strain full integration piezoelectric element (\textbf{CPE4E}) is used for analysis. The below figures shows the values of displacements (U), electrical potentials (EPOT) and reaction forces (RF ) for both abaqus and IGA element.\\
+Abaqus plane strain full integration piezoelectric element (\textbf{CPE4E}) is used for analysis. The below figures shows the values of displacements (U), electrical potentials (EPOT) and reaction forces (RF ) for both abaqus and IGA element.
+
+\newpage
+
 Figure(\ref{EM1U1}) and Figure(\ref{EM1U1_IGA}) shows the displacement (U1) values of the single CPE4E element and single IGA element at 100 \% loading in x direction respectively. \\
 \begin{figure}[H]
 	\centering
@@ -1130,6 +1286,9 @@ Figure(\ref{EM1U2}) and Figure(\ref{EM1U2_IGA}) shows the displacement (U2) valu
 	\end{center}	
 \end{figure}
 	\end{comment}
+	
+\newpage
+
 Figure(\ref{EM1RF1}) and Figure(\ref{EM1RF1_IGA}) shows the Reaction force values (RF1) of the single CPE4E element and single IGA element at 100 \% loading in x direction respectively. \\
 \begin{figure}[H]
 	\centering
@@ -1162,6 +1321,9 @@ Figure(\ref{EM1RF2}) and Figure(\ref{EM1RF2_IGA}) shows the Reaction force value
 		\label{EM1RF2_IGA}
 	\end{minipage}
 \end{figure}
+
+\newpage
+
 Figure(\ref{EM1EPOT}) and Figure(\ref{EM1EPOT_IGA}) shows the Electrical potential values (EPOT) of the single CPE4E element and single IGA element at 100 \% loading respectively. \\
 \begin{figure}[H]
 	\centering
@@ -1375,13 +1537,13 @@ The following table describes the proposed coding activities and achieved activi
 
 
 
-
+%\cite{agrawal2019iga} \cite{piegl2012nurbs}
 
 
 
 \noindent
 %*** Remember References and citations ***
 \bibliographystyle{plain}
-\bibliography{References}
+\bibliography{References} 
 \end{document}
 
