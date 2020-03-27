@@ -71,9 +71,9 @@ used to find approximate solutions of partial differential equations. FEM
 approximates the Computer Aided Drawing (CAD) geometry by discretizing it into
 smaller geometries called elements. Such geometrical approximations may create
 numerical errors and seriously effect the accuracy of the solution.
-Isogeometric analysis (IGA) is a technique to generate geometry using CAD
+Isogeometric analysis (IGA) on the other hand, is a technique to generate geometry using CAD
 concept of Non Uniform Rational B-Splines (NURBS) and analyse using its basis
-functions.
+functions \cite{agrawal2019iga}.
 With the use of NURBS basis functions instead of Lagrangian basis functions the geometry is captured exactly for the analysis and rules out the possibility of the geometrical errors. Moreover, the time from design to analysis phase is greatly reduced saving the cost and time for the industry.
 The IGA technique is firstly pioneered by Tom Hughes and his group at The
 University of Texas at Austin.\\
@@ -96,7 +96,7 @@ The present programming project aims at writing a python code to implement IGA f
 In this section a brief description of B-Splines is discussed since NURBS is an
 extended version of B-Splines. A B-Spline basis function is defined by its order
 and knot vectors. A B-spline basis function along with control points defines a
-B-Spline curve. A surface or volume can be generated using a curve by tensor product between basis functions which will be discussed in detail in the future sections. 
+B-Spline curve. A surface or volume can be generated using a curve by tensor product between its basis functions which will be discussed in detail in the future sections. 
 \begin{figure}[H]
 	\begin{center}
 		\includegraphics[scale=0.8]{B_Spline.png} 
@@ -118,8 +118,8 @@ The following figure shows a B-Spline curve with same number and position of con
 \subsection{Knot vector } \label{KnotVectorSection}
 A knot vector is an array with an ascending order of parameter values written as
 $\Xi = \{ \xi_0,\xi_1,\xi_2.....,\xi_{n+p}\}$
-($\xi_i$ is called $ith$ knot), with $n+1$ basis functions which will be discussed in later sections.
-The number of knots in a knot vector is equal to the summation of degree of the curve and total number of control points defining the curve. 
+($\xi_i$ is called $ith$ knot and $\{\xi_i,\xi_{i+1}\}$ is called $ith$ Knot span), with $n+1$ basis functions which will be discussed in later sections.
+The number of knots in a knot vector is equal to the summation of the degree of the curve and total number of control points defining the curve. 
 B-Spline curves are defined in parametric space which is divided by knot spans. 
 Knot vector should be an ascending order of knots. For example $\{0,0,1,1,2,3,3\}$ is valid but not $\{0,0,1,2,3,2,3\}$.
 There is no difference between $\Xi = \{0,0,0,1,2,3,4,4,4\}$ and $\Xi = \{0,0,0,1/4,2/4,3/4,1,1,1\}$ which can be seen from Fig.(\ref{SameKnotVector}) because the latter can be obtained by dividing the former by 4.
@@ -148,7 +148,7 @@ $[\Xi] - (p+1)$. For an $pth$ degree curve atleast $p+1$ control points have to 
 \subsection{B-Spline basis functions }
 
 For a given Knot vector $\Xi$, the B-spline basis function for polynomial degree
-$\geq 1$ is defined by a recursive function
+$\geq 1$ is defined by a recursive function \cite{piegl2012nurbs}
 
 \begin{equation}
 N_{i,p}(\xi) = \frac{\xi-\xi_{i}}{\xi_{i+p}-\xi_{i}} N_{i,p-1}(\xi) + 
@@ -176,15 +176,27 @@ N_{i,0}(\xi) =
 
 \begin{figure}[H]
 	\begin{center}
-		\includegraphics[scale=0.7]{BSplineBasisFunctions.png} 
-		\caption{\\Second degree B-Spline functions with a uniform knot vector  }\label{BSplineBasisFunctions}
+		\includegraphics[scale=0.7]{BSplineBasisFunctions.png}
+		\caption{\\Cubic B-Spline functions with a uniform knot vector \cite{piegl2012nurbs}   }\label{BSplineBasisFunctions}
 	\end{center}	
 \end{figure}
-
- 
+\noindent
+The following python function outputs non zero basis functions in a given knot vector span
+\begin{verbatim}
+-----------------------------------------------------------------------------------
+def BasisFuns(i,u,p,U):
+#----------Inputs---------#
+i - knot span
+u - parametric co-ordinate
+p - Degree of the curve
+U - knot vector of the curve
+#----------Outputs---------#
+non zero basis functions for the given parametric co-ordinate
+-----------------------------------------------------------------------------------
+\end{verbatim}
 
 \subsubsection{Derivatives }
-The first derivative of a B-Spline basis function with its variable $\xi$ is
+The first derivative of a B-Spline basis function \cite{nguyen2012introduction} with its variable $\xi$ is
 given by
 
 \begin{equation}
@@ -193,11 +205,26 @@ given by
 \end{equation}
 
 \noindent
-Higher order derivatives are not necessary for IGA formulation.
+Higher order derivatives are not necessary for IGA formulation.\\
+The following python function outputs derivatives of non zero basis functions in a given knot vector span.
+\begin{verbatim}
+-----------------------------------------------------------------------------------
+def DersBasisFuns(i,u,p,m,U):
+#----------Inputs---------#
+i - knot span
+u - parametric co-ordinate
+p - Degree of the curve
+U - knot vector of the curve
+m - derivatives upto and including m(th) 
+#----------Outputs---------#
+The function returns non zero basis functions and their derivatives
+upto and including mth derivative for the given parametric co-ordinate
+-----------------------------------------------------------------------------------
+\end{verbatim}
 
 \subsection{B-Spline curves}
 
-A $pth-degree$ B-Spline curve with a set of control points $P_i$ is given by
+A $pth-degree$ B-Spline curve with a set of control points $P_i$ is given by \cite{piegl2012nurbs}
 \begin{equation}
 C(\xi) = \sum_{i=0}^{n} N_{i,p}(\xi) P_i \qquad \xi_0 \leq \xi \leq \xi_{n+p}
 \end{equation}
@@ -214,7 +241,7 @@ control net $P_{i,j}$
 \begin{figure}[H]
 	\begin{center}
 		\includegraphics[scale=0.7]{B_Spline_Surface.png} 
-		\caption{\\A B-Spline surface with control points net}\label{B_Spline_Surface}
+		\caption{\\A B-Spline surface with control points net \cite{siggel2017tigl}}\label{B_Spline_Surface}
 	\end{center}	
 \end{figure}
 
@@ -238,7 +265,7 @@ S(\xi,\eta) = \sum_{i=0}^{n}\sum_{j=0}^{m} N_{i,j}^{p,q}(\xi,\eta) P_{i,j}
 \subsubsection{Derivatives}
 
 The partial derivatives of bivariate B-Spline basis functions w.r.t parametric
-co-ordinates is given as
+co-ordinates is given as \cite{nguyen2012introduction}
 
 \begin{equation} 
 \frac{\partial N_{i,j}^{p,q}(\xi,\eta)}{\partial \xi} = \frac{d}{d\xi}
@@ -257,13 +284,13 @@ curves and surfaces. A NURBS basis function is defined by its order and knot
 vector.
 
 \subsection{NURBS basis functions}
-NURBS basis functions $R_{i,p}(\xi)$ are defined as
-\begin{equation}
+NURBS basis functions $R_{i,p}(\xi)$ are defined as \cite{piegl2012nurbs}
+\begin{equation}\label{NURBSBasisFuncs}
 R_{i,p}(\xi) = \frac{N_{i,p}(\xi)w_{i}}{\sum_{i=0}^{n}N_{i,p}(\xi)w_{i}}
 \end{equation}
 
 \noindent
-where $N_{i,p}(\xi)$ is the $i$th B-Spline basis function with order p and
+where $N_{i,p}(\xi)$ is the $i$th B-Spline basis function with degree p and
 $w_{i}$ denotes weight of the $i$th control point ($P_i$). ***** Explain weights
 with help of an example****. When $w_{i} = constant \quad \forall i$ the NURBS
 basis function reduces to B-Spline basis function.
@@ -271,12 +298,13 @@ basis function reduces to B-Spline basis function.
 \begin{figure}[H]
 	\begin{center}
 		\includegraphics[scale=1.0]{WeightsCircles.png} 
-		\caption{\\NURBS circle with different control points and weights}\label{WeightsCircles}
+		\caption{\\NURBS circle with different control points and weights *** Refer This}\label{WeightsCircles}
 	\end{center}	
 \end{figure}
+
 \subsubsection{Derivatives}
 The first derivative of a NURBS basis function with its variable $\xi$ is given
-by
+by \cite{nguyen2012introduction}
 
 \begin{equation}
 \frac{d }{d \xi} R_{i,p}(\xi) = \frac{N^{'}_{i,p}(\xi)  W(\xi) - N_{i,p}(\xi) 
@@ -291,7 +319,7 @@ and $W^{'}(\xi) =  \sum_{i=0}^{n}N^{'}_{i,p}(\xi) w_i$
 
 
 \subsection{NURBS Curves }
-The $p^{th}$ degree NURBS curve is given by
+The $p^{th}$ degree NURBS curve is given by \cite{piegl2012nurbs}
 
 \begin{equation}
 C(\xi) =
@@ -302,12 +330,12 @@ in short form
 \begin{equation}
 C(\xi) = \sum_{i=0}^{n}R_{i,p}(\xi)P_{i}
 \end{equation}
-*****refer NURBS book and write more info*****\\
+\\
 A NURBS curve with different weights on control points along with its basis function is shown in Fig.(\ref{NURBSCurveBasisFunctions})
 \begin{figure}[H]
 	\begin{center}
 		\includegraphics[scale=0.7]{NURBSCurveBasisFunctions.png} 
-		\caption{\\$\Xi=\{0,0,0,0,1,2,3,4,4,4,4\}, w = \{1,1,1,3,1,1,1\}$\\(a) A third degree NURBS curve; (b) Associated NURBS basis functions}\label{NURBSCurveBasisFunctions}
+		\caption{\\$\Xi=\{0,0,0,0,1,2,3,4,4,4,4\}, w = \{1,1,1,3,1,1,1\}$\\(a) A third degree NURBS curve; (b) Associated NURBS basis functions \cite{piegl2012nurbs}}\label{NURBSCurveBasisFunctions}
 	\end{center}	
 \end{figure}
 \subsubsection{Properties }
@@ -324,7 +352,7 @@ curve basis functions.
 \begin{enumerate}[leftmargin=*]
 	\item NURBS Surfaces: \\
 	A NURBS surface with degree $p$ in $\xi$ direction and degree $q$ in $\eta$
-	direction is defined as
+	direction is defined as \cite{agrawal2019iga}
 	\begin{equation}
 	S(\xi,\eta) = \sum_{i=0}^{n}\sum_{j=0}^{m} R_{i,j}^{p,q}(\xi,\eta)  P_{i,j}
 	\end{equation}
@@ -334,8 +362,8 @@ curve basis functions.
 	\frac{N_{i,p}(\xi)N_{j,q}(\eta)w_{i,j}}{\sum_{i=0}^{n}\sum_{j=0}^{m}N_{i,p}(\xi)N_{j,q}(\eta)w_{i,j}}
 	\end{equation}
 	\item NURBS Solids: \\
-	A NURBS solid with degree $p,q,k$ in $\xi$, $\eta$, $\zeta$ directions
-	respectively is defined as
+	A NURBS solid with degree $p,q,r$ in $\xi$, $\eta$, $\zeta$ directions
+	respectively is defined as \cite{agrawal2019iga}
 	\begin{equation}
 	S(\xi,\eta,\zeta) = \sum_{i=0}^{n}\sum_{j=0}^{m}\sum_{k=0}^{l}
 	R_{i,j,k}^{p,q,r}(\xi,\eta,\zeta)  P_{i,j,k}
@@ -343,16 +371,13 @@ curve basis functions.
 	where the $R_{i,j,k}^{p,q,r}(\xi,\eta,\zeta)$ is given by
 	\begin{equation}
 	R_{i,j,k}^{p,q,r}(\xi,\eta,\zeta)  =
-	\frac{N_{i,p}(\xi)N_{j,q}(\eta)N_{k,l}(\zeta)w_{i,j,k}}{\sum_{i=0}^{n}\sum_{j=0}^{m}
+	\frac{N_{i,p}(\xi)N_{j,q}(\eta)N_{k,r}(\zeta)w_{i,j,k}}{\sum_{i=0}^{n}\sum_{j=0}^{m}
 		\sum_{k=0}^{l} N_{i,p}(\xi)N_{j,q}(\eta)N_{k,r}(\zeta)w_{i,j,k}}
 	\end{equation}
 \end{enumerate}
 
-
-refer NURBS book and write more info
-
 \subsection{Derivatives of NURBS bivariate Basis Functions}
-The first partial derivatives of NURBS bivariate basis function are given by
+The first partial derivatives of NURBS bivariate basis function are given by \cite{nguyen2012introduction}
 
 \begin{equation}
 \frac{\partial R_{i,j}^{p,q}}{\partial \xi} = \frac{N^{'}_{i,p} N_{j,q} W -
@@ -387,8 +412,7 @@ in a similar manner as bivariate basis functions using a chain rule.
 This section describes step-by-step implementation of the Isogeometric analysis.
 A modified FEM code structure can be used to implement IGA. Similar to FEM, IGA
 can be divided into pre-processing, processing and post-processing stages. The
-stages in an IGA analysis is shown with the help of an flow chart
-(Fig.\ref{PreProcessing})
+flow in an IGA analysis in each stage is shown with the help of an flow chart in respective sections.
 
 \begin{figure}[H]
 	\begin{center}
@@ -404,11 +428,46 @@ homogeneous and non-homogeneous boundary conditions on boundary defining control
 points due to their higher ($C^{p-1}$) continuity unlike $C^{0}$ continuity of
 FEM nodes. 
 
-\subsubsection{Geometry Creation}
-As mentioned before in the section \ref{NURBS}, the construction of NURBS
+\subsubsection{Geometry Creation} \label{GeometryCreation}
+As mentioned before in the section \ref{NURBS},apart from the physical details of the geometry like length, width, thickness etc. the construction of NURBS
 discretized geometry requires parametric details such as control points, knot
 vectors and the order of the NURBS curve. Commercial softwares like "Rhino" can
 be used to extract parametric details of the complex NURBS geometry. \\
+The following function in python is used for finding a point on NURBS surface.
+\begin{verbatim}
+NURBS_Surface_Point(n,p,U,m,q,V,Pw,u,v)
+\end{verbatim}
+Where, p and q are degree of the NURBS curve in $\xi$ and $\eta$ directions respectively, Pw control points vector, U and V are knot vector in $\xi$ and $\eta$ directions respectively. 
+n and m are calculated using below code
+\begin{verbatim}
+n=(np.size(U)-1)-p-1
+m=(np.size(V)-1)-q-1 
+\end{verbatim}
+u and v are any points in knot span, for example if 
+$U = \{0,0,1,2,3,4,4\}$,
+u can be 2.5 which belongs to knot span $\{2,3\}$ in U.\\
+The entire surface can be generated by looping over knot span points and by extracting surface points by using above function and plotting the output. 
+An example output of a geometry is shown below
+\begin{figure}[H]
+	\begin{center}
+		\includegraphics[scale=0.6]{Geometry.png} 
+		\caption{\\NURBS Geometry}\label{Geometry}
+	\end{center}	
+\end{figure}
+Parametric details of the geometry \cite{agrawal2019iga}:
+\begin{verbatim}
+Pw=
+[[-1.,0.,0.,1],[-0.85,0.35,0.,0.85],[-0.35,0.85,0.,0.85],[0.,1.,0.,1]],
+[[-2.5,0.,0.,1.],[-2.5,0.75,0.,1.],[-0.75,2.5,0.,1.],[0.,2.5,0.,1.]],
+[[-4,0.,0.,1.],[-4,4.,0.,1.],[-4.,4.,0.,1.],[0.,4.,0.,1.]]
+p=2 and q=2 # Degree of the curve in xi and eta directions
+U = [0., 0., 0., 1., 2., 2., 2.]
+V = [0., 0., 0., 1., 1., 1.]
+\end{verbatim}
+
+
+ 
+
 \subsubsection{Assembly arrays}
 Assembly arrays are required to assemble local discretized geometries to global
 geometry. For IGA as knot vector and control points defines the geometry two
@@ -418,30 +477,109 @@ connectivity array are required.
 	\item Control point assembly array: \\
 	The degree of the NURBS curve determines the number of control points
 	($n^e_{cp}$) present in an IGA element.
-	Considering a three-dimensional element ($\Omega^e$)\\
-	$n^e_{cp}$ = $(p+1)(q+1)(r+1)$ \\
+	Considering a two-dimensional element ($\Omega^e$)\\
+	$n^e_{cp}$ = $(p+1)(q+1)$ \\
 	The details of the control points are stored row wise in assembly array.
-	***This can be illustrated with an example below
+	The following function generates control point assembly array
+	\begin{verbatim}
+	def ControlPointAssembly(n,p,m,q,ele_no):
+	
+	#-----------------Inputs-----------------------#
+	# n-no.of control points along xi direction
+	# p-Degree of basis function along xi direction
+	# m-no.of control points along eta direction
+	# q-Degree  of basis function along eta direction
+	#-----------------Output-----------------------#
+	CP - Control point assembly array
+	\end{verbatim}
+	A control point assembly contains a two dimensional array with control point numbers of each element, row wise.
+	An assembly array with 2 elements as in Fig.(\ref{Element}) is shown below
+	\begin{equation} \label{CPassembly}
+	\textbf{CP} =
+	\begin{bmatrix}
+		1 & 2 & 4 & 5 \\
+		2 & 3 & 5 & 6 \\
+	\end{bmatrix}
+	\end{equation}
+	\begin{figure}[H]
+		\begin{center}
+			\includegraphics[scale=0.2]{Element.png} 
+			\caption{\\A simple 2D square geometry with two elements}\label{Element}
+		\end{center}	
+	\end{figure}
 	\item Knot vector connectivity array: \\
-	The knot vector connectivity matrix is a row wise matrix with each row
-	corresponds to respective element's knot spans. The columns corresponds to span
-	ranges along $\xi, \eta$ and $\zeta$ directions.
-	***This can be illustrated with an example below
+	The knot vector connectivity matrix \textbf{CP} is a row wise matrix with each row
+	corresponds to respective element. The columns corresponds to span
+	ranges (Span$\_$U and Span$\_$V) along $\xi$ and $\eta$ directions. \\
+	Knot vector array along $\xi$ and $\eta$ direction for geometry, Fig.(\ref{Element}): \\
+	$U = [ 0, 0, 1, 2, 2 ]$ \\
+	$V = [ 0, 0, 1, 1 ]$ \\
+	Span$\_$U is a 2D array which has rows equal to number of elements in $\xi$ direction.
+	\begin{equation} \label{SpanU}
+	\textbf{Span\_U} =
+	\begin{bmatrix}
+	0 & 1  \\
+	1 & 2  \\
+	\end{bmatrix}
+	\end{equation}
+	Similarly with only one element along $\eta$ direction
+	\begin{equation} \label{SpanU}
+	\textbf{Span\_V} =
+	\begin{bmatrix}
+	0 & 1  \\
+	\end{bmatrix}
+	\end{equation}
+	Knot connectivity for above geometry is given by,
+	\begin{equation} \label{CP}
+	\textbf{CP} =
+	\begin{bmatrix}
+	1 & 1  \\
+	2 & 1  \\
+	\end{bmatrix}
+	\end{equation}
+\\
+	The following lines of code executes Knot Connectivity array
+	\begin{verbatim}
+	uniqueU = np.unique(U)
+	uniqueV = np.unique(V)
+	nelU = ncpxi-p
+	nelV = ncpeta-q
+	CP = np.zeros((nel,2)) 
+	Span_U=np.zeros((nelU,2))#Span_U have rows equal to number of elements in xi direction
+	Span_V=np.zeros((nelV,2))#Span_V have rows equal to number of elements in eta direction
+	count=0
+	for i in range(0,nelV):
+	for j in range(0,nelU):
+	CP[count,:] = [j+1,i+1] 
+	# First and second coloumns of 'knotConnectivity' store the global number of knot 
+	span ranges
+	# or row number of Span_U and Span_V arrays
+	Span_U[j,:]= [uniqueU[j],uniqueU[j+1]]
+	Span_V[i,:]= [uniqueV[i],uniqueV[i+1]]
+	count=count+1
+	CP = knotConnectivity -1
+	CP = CP.astype(int)
+	\end{verbatim} 
+	
+	
+	\begin{verbatim}
+
+	\end{verbatim}
 \end{enumerate}
 \subsubsection{Boundary Conditions}
-A brief description on how to define boundary conditions (BCS) is described in this section. When the number of control points in each element in each direction equals the degree of the curve plus one in respective direction, a traditional way of defining homogeneous and inhomogeneous boundary conditions can be followed. In any other case a special treatment for defining BCS have to be followed which is not in the scope of this project. Procedures like least square minimization method are usually adopted for this purpose. 
+A brief description on how to define boundary conditions (BCS) is described in this section. When the number of control points in each element in each direction equals the degree of the curve plus one in respective direction, a traditional way of defining homogeneous and inhomogeneous boundary conditions as in FEM can be followed. In any other case a special treatment for defining BCS have to be followed which is not in the scope of this project. Procedures like least square minimization method are usually adopted for this purpose. 
 
 
 \subsection{Processing Stage of the Analysis}
 In the processing stage of analysis it is required to compute global elemental
 stiffness matrix and global force vector and solve these for the solution field.
-To formulate these matrices it requires NURBS basis functions and their
+To formulate these matrices, it requires NURBS basis functions and their
 derivatives evaluation. Numerical integration scheme like Gauss-Legendre rule is
 employed to solve the volume and area integrals involved in forming the
 stiffness matrix and internal force vector. Numerical integration involves
 mapping elements from physical space to master space (which is also called unit
 domain). As NURBS basis functions are defined in parametric space as given in
-Eq. ()it requires an additional mapping from physical space to parametric space
+Eq. (\ref{NURBSBasisFuncs})it requires an additional mapping from physical space to parametric space
 ($\Omega_e \rightarrow \widetilde{\Omega_e}$). Later parametric space can be
 mapped on to master space (($\widetilde{\Omega_e} \rightarrow
 \overline{\Omega_e}$)). This procedure is illustrated in
@@ -450,16 +588,16 @@ Fig.(\ref{MasterPhysical}).
 	\begin{center}
 		\includegraphics[scale=0.3]{Physical_Master.png} 
 		\caption{\\Mapping IGA Physical element to Master
-			element}\label{MasterPhysical}
+			element \cite{agrawal2019iga}}\label{MasterPhysical}
 	\end{center}	
 \end{figure}
 
 
 \begin{enumerate}[leftmargin=*]
-	\item Mapping from master space to parametric space: \\
+	\item Mapping from master space to parametric space \cite{agrawal2019iga}: \\
 	Consider a discretized IGA surface which is defined in parametric space
 	$\widetilde{\Omega_e}=[\xi_i,\xi_{i+1}]\otimes[\eta_i,\eta_{i+1}]$, Refer
-	Fig.(). The NURBS basis functions and their derivatives are evaluated at
+	Fig.(\ref{MasterPhysical}). The NURBS basis functions and their derivatives are evaluated at
 	$\xi,\eta$ of the element $\widetilde{\Omega_e}$. These $\xi,\eta$ co-ordinate
 	values are calculated by a linear mapping as shown below
 	\begin{equation}
@@ -479,7 +617,7 @@ Fig.(\ref{MasterPhysical}).
 	scheme for linear mapping 
 	
 	
-	\item Mapping from physical space to parametric space: \\
+	\item Mapping from physical space to parametric space \cite{agrawal2019iga}: \\
 	The Jacobian matrix $\textbf{J}_1$ used to map from physical space to
 	parametric space ($\Omega_e \rightarrow \widetilde{\Omega_e}$) is computed as:
 	
@@ -537,12 +675,23 @@ d\overline\xi d\overline\eta \right]
 where $nel$ is the total number of elements and $n_{gp}^e$, $gw_i$ denotes the
 number of Gauss points and their respective Gauss weights.\\
 \noindent
+The following function is used to get the J1 and J2 matrix along with their determinants.
+\begin{verbatim}
+--------------------------------------------------------------
+def Jacobian12(xi,eta,elU,elV):
+#-----------------Input------------------#
+Parametric Co-ordinates (xi,eta) of Gauss Points
+Knot span range (elU,elV) in xi and eta direction
+#-----------------Output-----------------#
+J1 and J2 matrices along with their determinants
+--------------------------------------------------------------
+\end{verbatim}
 The formulated global stiffness matrix and force vector are solved using
 numerical scheme like Newton-Raphson method for the solution field.
 \\A flow chart describing processing stage flow is shown in Fig.(\ref{Processing})
 \begin{figure}[H]
 	\begin{center}
-		\includegraphics[scale=0.7]{Processing.png} 
+		\includegraphics[scale=1.0]{Processing.png} 
 		\caption{\\Flow chart describing Processing Stage of IGA}\label{Processing}
 	\end{center}
 \end{figure}
@@ -561,13 +710,21 @@ displacement and solution dependent variables are plotted.
 	\\
 	$[\textbf{P}_{new}]=[\textbf{P}]+[\textbf{U}]$ \\
 	\\
-	$[\textbf{P}^{new}]$ control points array is used to plot the deformed
+	$[\textbf{P}_{new}]$ control points array is used to plot the deformed
 	geometry.
+	As discussed in section (\ref{GeometryCreation}), instead of initial control point matrix of the geometry \textbf{P}, \textbf{$P_{new}$} is given as input to the function 
+	\begin{verbatim}
+	def NURBS_Surface_Point(n,p,U,m,q,V,P_new,u,v):
+	\end{verbatim}
+	and the deformed geometry can be plotted.
+	 
 	
 	\item Plotting of displacements and solution dependent variables:
 	
 	A contour plot can be made using the displacement values ($U$) on deformed or undeformed geometry.
 	Due to the higher continuity of the NURBS basis functions stress recovery techniques are not necessary to extract solution field on the deformed geometry.  
+	
+	\textbf{plt.contourf} a matplotlib function is used to plot displacements, reaction forces, and electrical potentials, so that the comparison with abaqus post processing plots would be easier. The latter plots these solutions fields as a contour plot.
 	
 \end{enumerate}
 
@@ -586,12 +743,12 @@ displacement and solution dependent variables are plotted.
 \subsection{Governing Equations}
 The governing equation for mechanical deformation is based on conservation of
 linear momentum which can be written as
-\begin{equation}
+\begin{equation}\label{ConservationOfLM}
 \sigma_{ij,i} + b_j = 0
 \end{equation}
-where $ \sigma_{ij} $ and $ b_i $ is the Cauchy stress tensor and body force.
+where $ \sigma_{ij} $ and $ b_i $ is the Cauchy stress tensor and the body force.
 Due to the static nature of the analysis the inertial term is not included in
-the eq().\\*
+the eq(\ref{ConservationOfLM}).\\*
 Stress and strain are related by following constitutive equation
 \begin{equation}
 \sigma_{ij} = c_{ijkl} \epsilon_{kl}
@@ -611,7 +768,7 @@ Consider a domain $\Omega$ with $\Gamma_u$ as prescribed displacements and
 $\Gamma_t$ as traction boundary conditions. The domain boundary can be
 represented as $\Gamma = \Gamma_u \cup \Gamma_t$ and $\Gamma_u \cap \Gamma_t =
 \Phi$
-By using the principle of virtual work the eq() can be written as
+By using the principle of virtual work the eq(\ref{ConservationOfLM}) can be written as
 \begin{equation}
 \delta W = \int_\Omega (\sigma_{ij,i} + b_j ) \delta u_j dV = 0
 \end{equation} 
@@ -631,8 +788,6 @@ d\Omega \right]
 \end{equation}
 as an additional requirement $\delta u_j$ must be zero at essential boundary
 conditions ($\Gamma_u$) for a unique solution.
-***Additional data regarding detailed explanation of steps to derive weak form
-can be included.
 
 
 \subsection{IGA Formulation}
@@ -642,7 +797,7 @@ lagrangian basis functions, IGA uses NURBS basis functions which are used to
 generate the geometry itself. As discussed in the previous sections a
 multidimentional NURBS basis function is represented by
 $R_{i,j,k}^{p,q,r}(\xi,\eta,\zeta) \rightarrow R_i$. The isogeometric element 
-is represented by basis function $R_i$ and control points $P_i$ as
+is represented by basis function $R_i$ and control points $P_i$ as \cite{agrawal2019iga}
 \begin{equation} \label{Co-ordinate}
 \textbf{x}^e = \sum_{i=1}^{n_{cp}^e} R_i P_i
 \end{equation} 
@@ -710,7 +865,7 @@ is displacement vector and $\textbf{F}^e$ force vector
 
 \subsection{Governing Equations for Piezoelectric Materials}
 The coupled electro-mechanical interactions are governed by conservation of
-momentum and Gauss's law as:
+momentum and Gauss's law as \cite{nguyen2018finite}:
 \begin{equation} \label{MechEq}
 \sigma_{ij,j} + f_i = 0
 \end{equation} 
@@ -726,8 +881,8 @@ The constitutive equations for electromechanical coupling are defined as
 \begin{equation}
 D_i = e_{ikl} \varepsilon_{kl} + \kappa_{ik} E_k
 \end{equation}
-Where, $ C_{ijkl} $ , $ e_{ikj} $ and $ \varepsilon_{ij} $ are elastic,
-piezoelectric and dielectric material constants respectively. The Cauchy stain
+Where, $ C $ , $ e $ and $ \kappa $ are elastic,
+piezoelectric and dielectric material constants respectively. The Cauchy strain
 tensor is defined as:
 \begin{equation}
 \varepsilon_{ij} = \frac{1}{2} (u_{i,j} + u_{j,i})
@@ -740,7 +895,7 @@ E_i = -\phi_{,i}
 
 \subsection{Weak Formulation}
 Applying the principle of virtual work to the Eq.(\ref{MechEq})
-and Eq. (\ref{ElecEq}) we can write
+and Eq. (\ref{ElecEq}) we can write \cite{nguyen2018finite}
 \begin{equation} \label{CouplingWeakForm1}
 \int_\Omega ( \sigma_{ij,j} + f_i ) \delta u_i d\Omega = 0  
 \end{equation}
@@ -769,7 +924,7 @@ approach at weak form
 
 \subsection{IGA Formulation}
 By Galerkin approach, displacements, potentials and their virtual values are
-given by below equations
+given by below equations \cite{agrawal2019iga}
 
 \begin{equation} \label{u_and_du_2}
 \textbf{u}^e = \sum_{i=1}^{n_{cp}^e} R_i \textbf{u}_i \qquad \delta\textbf{u}^e
@@ -905,8 +1060,8 @@ Newton Raphson scheme for displacements and potential solution field.
 \section{Modelling and Results}
 \subsection{2D Plate with linear elastic loading}
 \subsubsection{Problem description}
-A 2D plate is subjected to mechanical loading as shown in Figure(\ref{XYLoading}).The properties of the material are, Young’s modulus E = 210GPa and Poisson's ratio $\nu$ = 0.3.
-The movement of bottom edge is fixed in y direction and left edge in x direction. A displacement of 0.1 mm on right edge and 0.2 mm on top edge in x and y directions are given respectively.
+A 2D plate is subjected to mechanical loading as shown in Figure(\ref{XYLoading}).The material used is PZT-PIC151 ceramics \cite{kozinov2018simulation} and the elastic constants of the material are given in appendix (\ref{MaterialProps}).
+The movement of bottom edge AB is fixed in y direction and left edge AC in x direction. A displacement of 0.1 mm on right edge BD and 0.2 mm on top edge CD in x and y directions are given respectively.
 \begin{figure}[H]
 	\centering
 	\begin{minipage}{.5\textwidth}
@@ -917,9 +1072,9 @@ The movement of bottom edge is fixed in y direction and left edge in x direction
 	\end{minipage}%
 	\begin{minipage}{.5\textwidth}
 		\centering
-		\includegraphics[width=1\linewidth]{XYLoading.png}
+		\includegraphics[width=0.9\linewidth]{XYLoading.png}
 		\captionof{figure}{2D Plate with loading}
-		\label{Loading}
+		\label{XYLoading}
 	\end{minipage}
 \end{figure}
 \subsubsection{Parametric details for the plate with single element}
@@ -940,10 +1095,11 @@ $n_{cp}$ = $n_{cp}(\xi) * n_{cp}(\eta)$ which is $2*2 = 4$. \\
 	\item Physical details for the geometry: \\
 	L = 10 \qquad \# Length of the plate in mm \\
 	H = 10 \qquad \# Height of the plate in mm \\
+	T =  1 {}  \qquad \# Thickness of the plate in mm \\
 	
 	\item Parametric details of the geometry: \\
-	$\Xi$ = [0,0,1,1] \qquad \# Knot vector in xi  direction \\
-	$H$ = [0,0,1,1] \qquad \# Knot vector in eta direction \\
+	$\Xi$ = [0,0,1,1] \qquad \# Knot vector in $\xi$  direction \\
+	$H$ = [0,0,1,1] \qquad \# Knot vector in $\eta$ direction \\
 	
 	Degree of the curve \\
 	p=1 \qquad \# Degree of the curve in $\xi$  direction \\
@@ -983,13 +1139,13 @@ $n_{cp}$ = $n_{cp}(\xi) * n_{cp}(\eta)$ which is $2*2 = 4$. \\
 		\end{tabular}
 	\end{center}
 	with fourth value in the paranthesis being weights of respective control points.
-	As this is the case of single element there is no need for the control point
+	**As this is the case of single element, there is no need for the control point
 	assembly array and knot vector connectivity matrix.
 \end{enumerate}
 \subsubsection{Results and discussions}
-Abaqus plane strain full integration element (\textbf{CPE4}) is used for analysis (CPE4 element is used to verify Program generated IGA results). 
+Considering the accuracy of the IGA simulation results over FEM results, IGA code generated results can be compared with abaqus inbuilt element generated results. An abaqus plane strain full integration element (\textbf{CPE4}) \cite{abaqus10version} is used for this purpose.
 \\The below figures shows the values of displacements (U) and reaction forces (RF ) for both abaqus and IGA element.\\
-\newpage
+
 \textbf{**A similar contour is used for the program generated results and abaqus results for an easy comparison. }\\
 Figure(\ref{M1U1}) and Figure(\ref{M1U1_IGA}) shows the displacement (U1) values of the single CPE4 element and single IGA element at 100 \% loading in x direction respectively. \\
 \begin{figure}[H]
@@ -997,13 +1153,13 @@ Figure(\ref{M1U1}) and Figure(\ref{M1U1_IGA}) shows the displacement (U1) values
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{M1U1.png}
-		\captionof{figure}{CPE4 Element:U1 \\Abaqus generated result}
+		\captionof{figure}{CPE4 Element:U1 \\\textbf{Abaqus generated result}}
 		\label{M1U1}
 	\end{minipage}%
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{M1U1_IGA.png}
-		\captionof{figure}{IGA Element:U1 \\ Program generated result}
+		\captionof{figure}{IGA Element:U1 \\ \textbf{Program generated result}}
 		\label{M1U1_IGA}
 	\end{minipage}
 \end{figure}
@@ -1028,18 +1184,19 @@ Figure(\ref{M1U2}) and Figure(\ref{M1U2_IGA}) shows the displacement (U2) values
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{M1U2.png}
-		\captionof{figure}{CPE4 Element:U2}
+		\captionof{figure}{CPE4 Element:U2
+		\\\textbf{Abaqus generated result}}
 		\label{M1U2}
 	\end{minipage}%
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{M1U2_IGA.png}
-		\captionof{figure}{IGA Element:U2}
+		\captionof{figure}{IGA Element:U2\\ \textbf{Program generated result}}
 		\label{M1U2_IGA}
 	\end{minipage}
 \end{figure}
 
-\newpage
+
 
 Figure(\ref{M1RF1}) and Figure(\ref{M1RF1_IGA}) shows the Reaction force values (RF1) of the single CPE4 element and single IGA element at 100 \% loading in x direction respectively. \\
 \begin{figure}[H]
@@ -1047,13 +1204,14 @@ Figure(\ref{M1RF1}) and Figure(\ref{M1RF1_IGA}) shows the Reaction force values 
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{M1RF1.png}
-		\captionof{figure}{CPE4 Element:RF1}
+		\captionof{figure}{CPE4 Element:RF1
+		\\\textbf{Abaqus generated result}}
 		\label{M1RF1}
 	\end{minipage}%
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{M1RF1_IGA.png}
-		\captionof{figure}{IGA Element:RF1}
+		\captionof{figure}{IGA Element:RF1\\ \textbf{Program generated result}}
 		\label{M1RF1_IGA}
 	\end{minipage}
 \end{figure}
@@ -1063,18 +1221,19 @@ Figure(\ref{M1RF2}) and Figure(\ref{M1RF2_IGA}) shows the Reaction force values 
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{M1RF2.png}
-		\captionof{figure}{CPE4 Element:RF2}
+		\captionof{figure}{CPE4 Element:RF2
+		\\\textbf{Abaqus generated result}}
 		\label{M1RF2}
 	\end{minipage}%
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{M1RF2_IGA.png}
-		\captionof{figure}{IGA Element:RF2}
+		\captionof{figure}{IGA Element:RF2\\ \textbf{Program generated result}}
 		\label{M1RF2_IGA}
 	\end{minipage}
 \end{figure}
 \subsubsection{Conclusion}
-As shown in figures above the values generated by IGA code are inline with the results of Abaqus element. So it can be concluded that IGA code written works fine for 2D one element case.
+As shown in figures above the values generated by IGA code are inline with the results of Abaqus element. So it can be concluded that IGA code written works well with 2D one element case.
 
 
 
@@ -1083,16 +1242,8 @@ As shown in figures above the values generated by IGA code are inline with the r
 
 \subsection{2D Plate with pure Electrical loading}
 \subsubsection{Problem description}
-A 2D plate is subjected to Electrical loading as shown in Figure(\ref{PureElectrical}).The properties of the material are, Young’s modulus E = 210GPa and Poisson's ratio $\nu$ = 0.3.
-The dielectric constants for the material are
-$$
-\varepsilon = \begin{bmatrix}
-6.752E-12 & 0 & 0 \\
-0 & 5.872E-12 & 0 \\
-0 & 0 & 6.752E-12\\
-\end{bmatrix} C/(V mm)
-$$ 
-The movement of bottom edge is fixed in y direction and left edge in x direction. An electrical potential V of 1000 volts (***Check units) is applied at one node as shown in Fig.(\ref{PureElectrical})
+A 2D plate is subjected to Electrical loading as shown in Figure(\ref{PureElectrical}).The material used is PZT-PIC151 ceramics and the dielectric constants can be seen in Appendix (\ref{MaterialProps})
+The movement of bottom edge AB is fixed in y direction and left edge AC in x direction. An electrical potential V of 1000 volts is applied at one node D as shown in Fig.(\ref{PureElectrical})
 \begin{figure}[H]
 	\centering
 	\begin{minipage}{.5\textwidth}
@@ -1114,24 +1265,24 @@ The movement of bottom edge is fixed in y direction and left edge in x direction
 The parametric details for the geometry are the same as in section \hyperref[ParametricDeatils1Elem]{\ref{ParametricDeatils1Elem}}
 
 \subsubsection{Results and discussions}
-Abaqus plane strain full integration element (\textbf{CPE4}) is used for analysis (CPE4 element is used to verify Program generated IGA results). 
-\\The below figures shows the values of Electrical potentials (EPOT) and reactive electrical nodal charge (RCHG) for both abaqus and IGA element.\\
-
-
-\textbf{**A similar contour is used for the program generated results and abaqus results for an easy comparison. }\\
-Figure(\ref{E1EPOT}) and Figure(\ref{E1EPOT_IGA}) shows the Electrical potential (EPOT) values of the single CPE4 element and single IGA element at 100 \% loading respectively. \\
+In this section the comparison is made between IGA code generated result and abaqus plane strain full integration piezoelectric element (\textbf{CPE4E}) \cite{abaqus10version}.\\The below figures shows the values of Electrical potentials (EPOT) and reactive electrical nodal charge (RCHG) for both abaqus and IGA element.\\
+\\\textbf{*** Electro-Mechanical coupling is deactivated in this case by giving all the piezoelectric constants a value of "zero"  }
+\\
+\textbf{***A similar contour is used for the program generated results and abaqus results for an easy comparison. }\\
+\\
+Figure(\ref{E1EPOT}) and Figure(\ref{E1EPOT_IGA}) shows the Electrical potential (EPOT) values of the single CPE4E element and single IGA element at 100 \% loading respectively. \\
 \begin{figure}[H]
 	\centering
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{E1EPOT.png}
-		\captionof{figure}{CPE4 Element:U1 \\Abaqus generated result}
+		\captionof{figure}{CPE4E Element:EPOT \\\textbf{Abaqus generated result}}
 		\label{E1EPOT}
 	\end{minipage}%
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{E1EPOT_IGA.png}
-		\captionof{figure}{IGA Element:U1 \\ Program generated result}
+		\captionof{figure}{IGA Element:EPOT \\ \textbf{Program generated result}}
 		\label{E1EPOT_IGA}
 	\end{minipage}
 \end{figure}
@@ -1150,65 +1301,33 @@ Figure(\ref{E1EPOT}) and Figure(\ref{E1EPOT_IGA}) shows the Electrical potential
 \end{center}	
 \end{figure}
 \end{comment}
-Figure(\ref{E1RCHG}) and Figure(\ref{E1RCHG_IGA}) shows the reactive nodal charge (RCHG) values of the single CPE4 element and single IGA element at 100 \% loading respectively. \\
+Figure(\ref{E1RCHG}) and Figure(\ref{E1RCHG_IGA}) shows the reactive nodal charge (RCHG) values of the single CPE4E element and single IGA element at 100 \% loading respectively. \\
 \begin{figure}[H]
 	\centering
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{E1RCHG.png}
-		\captionof{figure}{CPE4 Element:U2}
+		\captionof{figure}{CPE4 Element:RCHG
+		\\\textbf{Abaqus generated result}}
 		\label{E1RCHG}
 	\end{minipage}%
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{E1RCHG_IGA.png}
-		\captionof{figure}{IGA Element:U2}
+		\captionof{figure}{IGA Element:RCHG \\ \textbf{Program generated result}}
 		\label{E1RCHG_IGA}
 	\end{minipage}
 \end{figure}
 
 \subsubsection{Conclusion}
-As shown in figures above the values generated by IGA code are inline with the results of Abaqus element. So it can be concluded that IGA code written works fine for 2D one element case.
+As shown in figures above the values generated by IGA code are inline with the results of Abaqus element. So it can be concluded that for electrical analysis IGA code written works well with 2D one element case.
 
 
 
 \subsection{2D Piezoelectric plate}
 \subsubsection{Problem description}
 A 2D piezoelectric plate subjected to mechanical displacements and electrical
-loading is considered as shown in Figure(\ref{2Dplate}) . The material used is
-PZT4 and material properties are as follows
-
-$$
-C = \begin{bmatrix}
-139000 & 74280 & 77840 & 0 & 0 & 0\\
-47280 & 115400 & 74280 & 0 & 0 & 0\\
-77840 & 74280 & 139000 & 0 & 0 & 0\\
-0 & 0 & 0 & 25640 & 0 & 0\\
-0 & 0 & 0 & 0 & 25640 & 0\\
-0 & 0 & 0 & 0 & 0 & 25640\\
-\end{bmatrix} MPa
-$$  
-$$
-e = \begin{bmatrix}
-0 & -5.20710E-6 & 0 \\
-0 & 15.08E-6 & 0 \\
-0 & -5.207E-6 & 0\\
-12.710E-6 & 0 & 0 \\
-0 & 0 & 0 \\
-0 & 0 & 12.710E-6 \\
-\end{bmatrix} C/ mm`2
-$$
-$$
-\varepsilon = \begin{bmatrix}
-6.752E-12 & 0 & 0 \\
-0 & 5.872E-12 & 0 \\
-0 & 0 & 6.752E-12\\
-\end{bmatrix} C/(V mm)
-$$
-where \\
-C is Elastic constants, e is Piezoelectric constants and $\varepsilon$ being
-dielectric constants.
-The material is polarized in Y-direction.
+loading is considered as shown in Fig.(\ref{EMLoading}) . The material used is PZT-PIC151 ceramics and the properties can be seen in Appendix (\ref{MaterialProps})
 
 \begin{figure}[H]
 	\centering
@@ -1222,21 +1341,27 @@ The material is polarized in Y-direction.
 		\centering
 		\includegraphics[width=1\linewidth]{Grounded.png}
 		\captionof{figure}{2D Piezoelectric Plate with loading}
-		\label{Loading}
+		\label{EMLoading}
 	\end{minipage}
 \end{figure}
-The movement of the bottom edge and left edge of 2D piezoelectric plate is fixed
-in y direction and x direction respectively as shown in figure(\ref{Loading}).
-The left edge is grounded (Electric potential $\Phi = 0$)and a displacement load
-of 0.1 mm and 0.2 mm is applied on the right edge and top edge respectively. The
+The movement of the bottom edge AB and left edge AC of 2D piezoelectric plate is fixed
+in y direction and x direction respectively as shown in figure(\ref{EMLoading}).
+The left edge AC is grounded (Electric potential $\Phi = 0$)and a displacement load
+of 0.1 mm and 0.2 mm is applied on the right edge BD and top edge CD respectively. The
 results for single element case and multiple elements is discussed in the below
 sections. \\
 The results generated by IGA code is compared with inbuilt Abaqus piezoelectric
-element.
+element \textbf{CPE4E}
+
+\subsubsection{Parametric details for the plate with single element}
+
+
+The parametric details for the geometry are the same as in section \hyperref[ParametricDeatils1Elem]{\ref{ParametricDeatils1Elem}}
+
 \subsubsection{Results and discussions}
 Abaqus plane strain full integration piezoelectric element (\textbf{CPE4E}) is used for analysis. The below figures shows the values of displacements (U), electrical potentials (EPOT) and reaction forces (RF ) for both abaqus and IGA element.
 
-\newpage
+
 
 Figure(\ref{EM1U1}) and Figure(\ref{EM1U1_IGA}) shows the displacement (U1) values of the single CPE4E element and single IGA element at 100 \% loading in x direction respectively. \\
 \begin{figure}[H]
@@ -1244,13 +1369,14 @@ Figure(\ref{EM1U1}) and Figure(\ref{EM1U1_IGA}) shows the displacement (U1) valu
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM1U1.png}
-		\captionof{figure}{CPE4E Element:U1}
+		\captionof{figure}{CPE4E Element:U1
+		\\\textbf{Abaqus generated result}}
 		\label{EM1U1}
 	\end{minipage}%
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM1U1_IGA.png}
-		\captionof{figure}{IGA Piezoelectric Element:U1}
+		\captionof{figure}{IGA Piezoelectric Element:U1\\ \textbf{Program generated result}}
 		\label{EM1U1_IGA}
 	\end{minipage}
 \end{figure}
@@ -1261,13 +1387,14 @@ Figure(\ref{EM1U2}) and Figure(\ref{EM1U2_IGA}) shows the displacement (U2) valu
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM1U2.png}
-		\captionof{figure}{CPE4E Element:U2}
+		\captionof{figure}{CPE4E Element:U2
+		\\\textbf{Abaqus generated result}}
 		\label{EM1U2}
 	\end{minipage}%
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM1U2_IGA.png}
-		\captionof{figure}{IGA Piezoelectric Element:U2}
+		\captionof{figure}{IGA Piezoelectric Element:U2\\ \textbf{Program generated result}}
 		\label{EM1U2_IGA}
 	\end{minipage}
 \end{figure}
@@ -1287,7 +1414,7 @@ Figure(\ref{EM1U2}) and Figure(\ref{EM1U2_IGA}) shows the displacement (U2) valu
 \end{figure}
 	\end{comment}
 	
-\newpage
+
 
 Figure(\ref{EM1RF1}) and Figure(\ref{EM1RF1_IGA}) shows the Reaction force values (RF1) of the single CPE4E element and single IGA element at 100 \% loading in x direction respectively. \\
 \begin{figure}[H]
@@ -1295,13 +1422,14 @@ Figure(\ref{EM1RF1}) and Figure(\ref{EM1RF1_IGA}) shows the Reaction force value
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM1RF1.png}
-		\captionof{figure}{CPE4E Element:RF1}
+		\captionof{figure}{CPE4E Element:RF1
+		\\\textbf{Abaqus generated result}}
 		\label{EM1RF1}
 	\end{minipage}%
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM1RF1_IGA.png}
-		\captionof{figure}{IGA Piezoelectric Element:RF1}
+		\captionof{figure}{IGA Piezoelectric Element:RF1\\ \textbf{Program generated result}}
 		\label{EM1RF1_IGA}
 	\end{minipage}
 \end{figure}
@@ -1311,18 +1439,19 @@ Figure(\ref{EM1RF2}) and Figure(\ref{EM1RF2_IGA}) shows the Reaction force value
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM1RF2.png}
-		\captionof{figure}{CPE4E Element:RF2}
+		\captionof{figure}{CPE4E Element:RF2
+		\\\textbf{Abaqus generated result}}
 		\label{EM1RF2}
 	\end{minipage}%
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM1RF2_IGA.png}
-		\captionof{figure}{IGA Piezoelectric Element:RF2}
+		\captionof{figure}{IGA Piezoelectric Element:RF2\\ \textbf{Program generated result}}
 		\label{EM1RF2_IGA}
 	\end{minipage}
 \end{figure}
 
-\newpage
+
 
 Figure(\ref{EM1EPOT}) and Figure(\ref{EM1EPOT_IGA}) shows the Electrical potential values (EPOT) of the single CPE4E element and single IGA element at 100 \% loading respectively. \\
 \begin{figure}[H]
@@ -1330,20 +1459,21 @@ Figure(\ref{EM1EPOT}) and Figure(\ref{EM1EPOT_IGA}) shows the Electrical potenti
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM1EPOT.png}
-		\captionof{figure}{CPE4E Element:EPOT}
+		\captionof{figure}{CPE4E Element:EPOT
+		\\\textbf{Abaqus generated result}}
 		\label{EM1EPOT}
 	\end{minipage}%
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM1EPOT_IGA.png}
-		\captionof{figure}{IGA Piezoelectric Element:EPOT}
+		\captionof{figure}{IGA Piezoelectric Element:EPOT\\ \textbf{Program generated result}}
 		\label{EM1EPOT_IGA}
 	\end{minipage}
 \end{figure}
 \subsubsection{Conclusion}
-As shown in figures above the values generated by IGA code are inline with the results of Abaqus element. So it can be concluded that IGA code written works fine for 2D one element case.
+As shown in figures above the values generated by IGA code for an electro-mechanical coupling are inline with the results of Abaqus element. So it can be concluded that IGA code written works well with a 2D one element case.
 
-\subsubsection{Parametric details for the plate with 3 elements in x direction and  2 elements in y direction}
+\subsubsection{Parametric details for the plate with 2 elements in x direction and  3 elements in y direction}
 The 2nd order NURBS curve is used in both $\xi$ and $\eta$ directions. \\
 \begin{comment}
 The knot vectors along $\xi$ and $\eta$ directions are \\
@@ -1375,6 +1505,7 @@ $$
 	\item Physical details for the geometry: \\
 	L = 10 \qquad \# Length of the plate in mm \\
 	H = 10 \qquad \# Height of the plate in mm \\
+	T = 1 {} \qquad \# Thickness of the plate in mm \\
 	
 	\item Parametric details of the geometry: \\
 	$\Xi$ =  [0,0,1,2,2] \qquad \# Knot vector in xi  direction \\
@@ -1416,13 +1547,14 @@ Figure(\ref{EM23U1}) and Figure(\ref{EM23U1_IGA}) shows the displacement (U1) va
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM23U1.png}
-		\captionof{figure}{CPE4E Element:U1}
+		\captionof{figure}{CPE4E Element:U1
+		\\\textbf{Abaqus generated result}}
 		\label{EM23U1}
 	\end{minipage}%
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM23U1_IGA.png}
-		\captionof{figure}{IGA Piezoelectric Element:U1}
+		\captionof{figure}{IGA Piezoelectric Element:U1\\ \textbf{Program generated result}}
 		\label{EM23U1_IGA}
 	\end{minipage}
 \end{figure}
@@ -1448,13 +1580,14 @@ Figure(\ref{EM23U2}) and Figure(\ref{EM23U2_IGA}) shows the displacement (U2) va
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM23U2.png}
-		\captionof{figure}{CPE4E Element:U2}
+		\captionof{figure}{CPE4E Element:U2
+		\\\textbf{Abaqus generated result}}
 		\label{EM23U2}
 	\end{minipage}%
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM23U2_IGA.png}
-		\captionof{figure}{IGA Piezoelectric Element:U2}
+		\captionof{figure}{IGA Piezoelectric Element:U2\\ \textbf{Program generated result}}
 		\label{EM23U2_IGA}
 	\end{minipage}
 \end{figure}
@@ -1464,13 +1597,14 @@ Figure(\ref{EM23RF1}) and Figure(\ref{EM23RF1_IGA}) shows the Reaction force val
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM23RF1.png}
-		\captionof{figure}{CPE4E Element:RF1}
+		\captionof{figure}{CPE4E Element:RF1
+		\\\textbf{Abaqus generated result}}
 		\label{EM23RF1}
 	\end{minipage}%
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM23RF1_IGA.png}
-		\captionof{figure}{IGA Piezoelectric Element:RF1}
+		\captionof{figure}{IGA Piezoelectric Element:RF1\\ \textbf{Program generated result}}
 		\label{EM23RF1_IGA}
 	\end{minipage}
 \end{figure}
@@ -1480,13 +1614,14 @@ Figure(\ref{EM23RF2}) and Figure(\ref{EM23RF2_IGA}) shows the Reaction force val
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM23RF2.png}
-		\captionof{figure}{CPE4E Element:RF2}
+		\captionof{figure}{CPE4E Element:RF2
+		\\\textbf{Abaqus generated result}}
 		\label{EM23RF2}
 	\end{minipage}%
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM23RF2_IGA.png}
-		\captionof{figure}{IGA Piezoelectric Element:RF2}
+		\captionof{figure}{IGA Piezoelectric Element:RF2\\ \textbf{Program generated result}}
 		\label{EM23RF2_IGA}
 	\end{minipage}
 \end{figure}
@@ -1496,19 +1631,20 @@ Figure(\ref{EM23EPOT}) and Figure(\ref{EM23EPOT_IGA}) shows the Electrical poten
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM23EPOT.png}
-		\captionof{figure}{CPE4E Element:EPOT}
+		\captionof{figure}{CPE4E Element:EPOT
+		\\\textbf{Abaqus generated result}}
 		\label{EM23EPOT}
 	\end{minipage}%
 	\begin{minipage}{.5\textwidth}
 		\centering
 		\includegraphics[width=1\linewidth]{EM23EPOT_IGA.png}
-		\captionof{figure}{IGA Piezoelectric Element:EPOT}
+		\captionof{figure}{IGA Piezoelectric Element:EPOT\\ \textbf{Program generated result}}
 		\label{EM23EPOT_IGA}
 	\end{minipage}
 \end{figure}
 
 \subsubsection{Conclusion}
-As shown in figures above the values generated by IGA code are inline with the results of Abaqus elements. 
+As shown in figures above for a 6 elements case the results generated by IGA code are inline with the results of the Abaqus elements.   
 
 
 
@@ -1535,9 +1671,46 @@ The following table describes the proposed coding activities and achieved activi
 	\end{tabular}
 \end{center}
 
+\section{Appendices}
+
+\subsection{Material Properties} \label{MaterialProps}
+The material used is
+PZT-PIC151 ceramics and the properties \cite{kozinov2018simulation} are as follow. The elastic constants (C) are transversely isotropic, dielectric constants ($\kappa$) are anisotropic and material is polarized in Y-direction. 
+
+$$
+C = \begin{bmatrix}
+139000 & 74280 & 77840 & 0 & 0 & 0\\
+47280 & 115400 & 74280 & 0 & 0 & 0\\
+77840 & 74280 & 139000 & 0 & 0 & 0\\
+0 & 0 & 0 & 25640 & 0 & 0\\
+0 & 0 & 0 & 0 & 25640 & 0\\
+0 & 0 & 0 & 0 & 0 & 25640\\
+\end{bmatrix} MPa
+$$  
+$$
+e = \begin{bmatrix}
+0 & -5.20710E-6 & 0 \\
+0 & 15.08E-6 & 0 \\
+0 & -5.207E-6 & 0\\
+12.710E-6 & 0 & 0 \\
+0 & 0 & 0 \\
+0 & 0 & 12.710E-6 \\
+\end{bmatrix} C/ mm`2
+$$
+$$
+\varepsilon = \begin{bmatrix}
+6.752E-12 & 0 & 0 \\
+0 & 5.872E-12 & 0 \\
+0 & 0 & 6.752E-12\\
+\end{bmatrix} C/(V mm)
+$$
+where \\
+e is Piezoelectric constants.
 
 
-%\cite{agrawal2019iga} \cite{piegl2012nurbs}
+
+
+
 
 
 
