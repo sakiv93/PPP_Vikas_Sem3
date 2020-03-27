@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#------------------------------------------26 Feb-----------------------------------------------#
+#--------------------------------------27th March-----------------------------------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -31,37 +31,17 @@ def Jacobian12(xi,eta,elU,elV):
 
     #--------Evaluation of NURBS Surface basis functions derivatives---------#
     Aders,wders = SurfaceDerivsAlgAuv(n,p,U,m,q,V,P,W,xi,eta,d)
-    #print('Aders:',Aders)
-    #print('wders:',wders)
 
     #-----------------------------------------------------------------------------------------------
-    #---------------------- Without using RatSurfaceDerivs----------------------------#
     dRx_dxi     = (Aders[1][0][0]*wders[0][0] - wders[1][0]*Aders[0][0][0])/(wders[0][0]*wders[0][0])
     dRy_dxi     = (Aders[1][0][1]*wders[0][0] - wders[1][0]*Aders[0][0][1])/(wders[0][0]*wders[0][0])
     dRx_deta    = (Aders[0][1][0]*wders[0][0] - wders[0][1]*Aders[0][0][0])/(wders[0][0]*wders[0][0])
     dRy_deta     = (Aders[0][1][1]*wders[0][0] - wders[0][1]*Aders[0][0][1])/(wders[0][0]*wders[0][0])
     J1 = np.array([[dRx_dxi[0],dRx_deta[0]],
                 [dRy_dxi[0],dRy_deta[0]]])
-    print('J1',J1)
-
-
-    #-----------------------------------------------------------------------------------------------
-    # dRx = RatSurfaceDerivs(Aders,wders,d)
-    # #print('dRx',dRx)
-    # dRx_dxi  =  dRx[1][0][0]
-    # dRx_deta =  dRx[0][1][0]
-    # dRy_dxi  =  dRx[1][0][1]
-    # dRy_deta =  dRx[0][1][1]
-    # print('dRx',dRx[1][0][0],dRx[0][1][0],dRx[1][0][1],dRx[0][1][1])
-    # J1 = np.array([[dRx_dxi,dRx_deta],
-    #             [dRy_dxi,dRy_deta]])
-    # print('J1 Matrix : ',J1)
-    #-----------------------------------------------------------------------------------------------
-
 
     J1det = (dRx_dxi[0]*dRy_deta[0])-(dRx_deta[0]*dRy_dxi[0])
     J1inv = np.linalg.inv(J1)
-    #print('J1inv : ',J1inv)
     return J1,J1det,J2det
 
 def B_matrix(xi,eta,J1):
@@ -85,7 +65,7 @@ def B_matrix(xi,eta,J1):
     vspan = FindSpan(m,q,eta,V)
     print('vspan',vspan)
     # Indices of non vanishing basis functions
-    NVu = np.arange(uspan-p,uspan+1,1) #Thoroughly checked. Can crosscheck again
+    NVu = np.arange(uspan-p,uspan+1,1)
     print('NVu',NVu)
     NVv = np.arange(vspan-q,vspan+1,1)
     print('NVv',NVv)
@@ -93,15 +73,10 @@ def B_matrix(xi,eta,J1):
     Denom = wders[0][0]
     Denom_du = wders[1][0]
     Denom_dv = wders[0][1]
-    #***********Change this back again************************************************
-    # dR_du = np.zeros((ncpxi,ncpeta))
-    # dR_dv = np.zeros((ncpxi,ncpeta))
-    #***********************************************************
 
     dR_dx = np.zeros((necpxi,necpeta))
     dR_dy = np.zeros((necpxi,necpeta))
     #---------------Loop over Non vanishing NURBS Basis Functions-------------#
-    #***************Forgot to multiply with control points weights*************# Have to do it
     for ii, ii_value in enumerate(NVu):
         for jj, jj_value in enumerate(NVv):
             BFu = BasisFuns(uspan,xi,p,U)
@@ -115,12 +90,6 @@ def B_matrix(xi,eta,J1):
             DBFv = DersBasisFuns(vspan,eta,q,d,V)
             Num_du = DBFu[1][ii]*BFv[jj]*W[ii][jj]
             Num_dv = BFu[ii]*DBFv[1][jj]*W[ii][jj]
-            #Num_du = DBFu[1][ii]*BFv[jj]
-            #Num_dv = BFu[ii]*DBFv[1][jj]
-            #***********Change this back again************************************************
-            # dR_du[ii_value][jj_value] = Num_du/Denom - Denom_du*Num/(Denom*Denom)
-            # dR_dv[ii_value][jj_value] = Num_dv/Denom - Denom_dv*Num/(Denom*Denom)
-            #***********Change this back again************************************************
             dR_dxi = Num_du/Denom - Denom_du*Num/(Denom*Denom)
             dR_deta = Num_dv/Denom - Denom_dv*Num/(Denom*Denom) 
 
@@ -130,43 +99,25 @@ def B_matrix(xi,eta,J1):
             print('dR_dx_dR_dy',dR_dx_dR_dy)
             dR_dx[ii][jj] = dR_dx_dR_dy[0]
             dR_dy[ii][jj] = dR_dx_dR_dy[1]
-            
-            # dR_dxi[ii][jj] = Num_du/Denom - Denom_du*Num/(Denom*Denom)
-            # dR_deta[ii][jj] = Num_dv/Denom - Denom_dv*Num/(Denom*Denom)
             print('dR_du',dR_dx[ii][jj])
             print('dR_dv',dR_dy[ii][jj])
     #-------------Have to multiply dR_du / dR_dv matrix with jacobian matrix-------------------#
 
-
-
-
-
-
     #---------Flatten (Convert 2D to 1D array) DervsNURBS Function------------#
     #dR_du(0,0)....dR_du(0,1),dR_du(1,0),.....dR_du(1,4).....dR_du(4,0),..........dR_du(4,4)
-    #print(dR_du)
-    #fdR_du = dR_du.flatten()
     fdR_dx = (np.transpose(dR_dx)).flatten() #************Cross check this******************#
     print('fdR_dx',fdR_dx)
-    #print(fdR_du)
-    #fdR_dv = dR_dv.flatten()
     fdR_dy = (np.transpose(dR_dy)).flatten()
     print('fdR_dv',fdR_dy)
-    #print(fdR_dv)
     #-------------------------Bu Matrix --------------------------#
     for i2 in range(necp):
         print('necp',necp)
         j1= 2*i2
         j2= 2*i2+1
         Bu[0,j1] = fdR_dx[i2]
-        #print(j1,j2)
-        #print(Bu[0,j1])
         Bu[1,j2] = fdR_dy[i2]
-        #print(Bu[1,j2])
         Bu[2,j1] = fdR_dy[i2]
-        #print(Bu[2,j1])
         Bu[2,j2] = fdR_dx[i2]
-        #print(Bu[2,j2])
 
         Be[0,i2] = fdR_dx[i2]
         Be[1,i2] = fdR_dy[i2]
@@ -188,8 +139,6 @@ def elementRoutine(U_e,elU,elV,T_m):
         Stress,Strain,Electric field and Electric displacements at Gauss points
     """
     print('Elu,Elv:',elU,elV)
-    #Bu=np.zeros((3,nudof*necp))
-    #Be=np.zeros((2,necp))
 
     Kt_e = np.zeros(((nudof+nedof)*necp,(nudof+nedof)*necp))
     K_MM=np.zeros((nudof*necp,nudof*necp))
@@ -203,27 +152,28 @@ def elementRoutine(U_e,elU,elV,T_m):
     epsilon_ig=np.zeros((np.shape(GPs_Ws)[0],3,1))
     electric_field_ig = np.zeros((np.shape(GPs_Ws)[0],2,1))
     Electrical_Displacement_ig = np.zeros((np.shape(GPs_Ws)[0],2,1))
-    #F_ext_e=np.zeros(((nudof+nedof)*necp,1)
 
     #-----------Looping over gauss point-----------#
 
     for j in range(np.shape(GPs_Ws)[0]):
 
-        gp = GPs_Ws[j,0:2]
-        wg = GPs_Ws[j,2]
-        ximas = gp[0]  #Gauss points in Master space
-        etamas = gp[1] #Gauss points in Master space
-        xi = 0.5*((elU[1]-elU[0])*ximas + (elU[1]+elU[0]))     #Gauss points in Parametric space
-        eta = 0.5*((elV[1]-elV[0])*etamas + (elV[1]+elV[0]))   #Gauss points in Parametric space
+        gp = GPs_Ws[j,0:2] # For fetching respective gauss points
+        wg = GPs_Ws[j,2]   # For fetching respective gauss point weights
+        ximas = gp[0]  # Gauss points in Master space
+        etamas = gp[1] # Gauss points in Master space
+        xi = 0.5*((elU[1]-elU[0])*ximas + (elU[1]+elU[0]))     # Gauss points in Parametric space
+        eta = 0.5*((elV[1]-elV[0])*etamas + (elV[1]+elV[0]))   # Gauss points in Parametric space
 
-        #------Calculating J1 and J2 determinants-----------#
+        #------Calling Jacobian12 Function to get J1 and J2 determinants-----------#
 
         J1,J1det,J2det = Jacobian12(xi,eta,elU,elV)
+        print('J1 Matrix:',J1)
         print('Determinat of J1 : ',J1det)
         print('Determinat of J2 : ',J2det)
         print('Weight',wg)
 
-        #-------------------------Bu and Be Matrix --------------------------#
+        #-----------------Calling B_matrix function for Bu and Be Matrix--------------------#
+        #-------Bu::(B matrix for mechanical case) Be::(B matrix for electrical case) ------#
 
         Bumatrix,Bematrix = B_matrix(xi,eta,J1)
         print('xi,eta',xi,eta)
@@ -243,9 +193,13 @@ def elementRoutine(U_e,elU,elV,T_m):
         print('epsilon',epsilon)
         print('electric_field',electric_field)
 
+        #-----------------------Calling Matrial Routine----------------------#
+
         C, e, k, sigma, Electrical_Displacement = materialRoutine(epsilon,electric_field, T_m)
         print('Sigma,ED',sigma,Electrical_Displacement)
-        sigma_ig[j] = sigma
+        #-----Storing value of Stress at each gauss point
+        sigma_ig[j] = sigma 
+        #-----Storing value of Electrical Displacement at each gauss point                                   
         Electrical_Displacement_ig[j] = Electrical_Displacement
         #-------------------------Local Stiffness matrix Ke-------------------#
         CBu=np.matmul(C,Bumatrix)
@@ -266,36 +220,29 @@ def elementRoutine(U_e,elU,elV,T_m):
         K_ME = K_ME + BueBe*J1det*J2det*wg*Thick
         K_EM = K_EM + BeeBu*J1det*J2det*wg*Thick
         K_EE = K_EE + BekBe*J1det*J2det*wg*Thick
-        #print('KEE:',K_EE)
 
-        #Arranging to Kt_e matrix 
-        Kt_e[0:necp*nudof,0:necp*nudof]                                 = K_MM
-        Kt_e[0:necp*nudof,necp*nudof:necp*(nudof+nedof)]                = K_ME
-        Kt_e[necp*nudof:necp*(nudof+nedof),0:necp*nudof]                 = K_EM
-        Kt_e[necp*nudof:necp*(nudof+nedof),necp*nudof:necp*(nudof+nedof)] = K_EE
+        #Arranging to Kt_e matrix (Local Stiffness matrix)
+        #    Kt_e = [K_MM K_ME]
+        #           [K_EM K_EE]
+        Kt_e[0:necp*nudof,0:necp*nudof]                                     = K_MM
+        Kt_e[0:necp*nudof,necp*nudof:necp*(nudof+nedof)]                    = K_ME
+        Kt_e[necp*nudof:necp*(nudof+nedof),0:necp*nudof]                    = K_EM
+        Kt_e[necp*nudof:necp*(nudof+nedof),necp*nudof:necp*(nudof+nedof)]   = K_EE
         print('K_MM',Kt_e[0:necp*nudof,0:necp*nudof])
         print('K_ME',Kt_e[0:necp*nudof,necp*nudof:necp*(nudof+nedof)])
         print('K_EM',Kt_e[necp*nudof:necp*(nudof+nedof),0:necp*nudof])
         print('K_EE', Kt_e[necp*nudof:necp*(nudof+nedof),necp*nudof:necp*(nudof+nedof)])
 
+        #------------Internal Force calculations--------------------#
+
+        #-------Internal Force calculation for Mechanical case
         Fu_int_e= Fu_int_e+np.matmul(np.transpose(Bumatrix),sigma)*J1det*J2det*wg*Thick
+        #-------Internal Force calculation for Electrical case
         Fe_int_e= Fe_int_e+np.matmul(np.transpose(Bematrix),Electrical_Displacement)*J1det*J2det*wg*Thick
 
-        #Arranging to F_int matrix 
+        # ------Arranging to local Forec_internal matrix 
         F_int_e[0:nudof*necp] = Fu_int_e                              # 0 1 2 3 4 5 6 7
         F_int_e[nudof*necp:(nudof*necp+nedof*necp)] = Fe_int_e        # 8 9 10 11
+        #-------Initiating Force External as zero array because of displacement driven algorithm  
         F_ext_e = np.zeros_like(F_int_e)    
-
-    #$$$$$     Didnt return gauss points co-ordinates     $$$$$#    
     return Kt_e, F_int_e, F_ext_e, sigma_ig, Electrical_Displacement_ig,epsilon_ig,electric_field_ig
-
-
-#----------------Test case------------------#
-
-# U_e = np.zeros((necp*nudof,1))
-# Kt_e, F_int_e, F_ext_e,sigma = elementRoutine(U_e, 1)
-
-# print(Kt_e)
-# print(F_int_e)
-# print(F_ext_e)
-# print(sigma)

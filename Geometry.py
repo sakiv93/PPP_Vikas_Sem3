@@ -1,5 +1,5 @@
 #----------------------------------Displacement Driven------------------------------------------#
-#------------------------------------------26 Feb-----------------------------------------------#
+#--------------------------------------27th March-----------------------------------------------#
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -13,14 +13,16 @@ p=1 #Degree of the curve in xi direction
 q=1 #Degree of the curve in eta direction
 
 #-----------------------------------Dimentions of 2D Plate--------------------------------------#
-Thick   = 1.0 #Thickness of the plate
-Length  = 10.0
-Height  = 10.0
+Thick   = 1.0  #Thickness of the plate
+Length  = 10.0 #Length of the plate
+Height  = 10.0 #Height of the plate
 
 #------------------Number of Control points in xi and eta direction-----------------------------#
-ncpxi    = 2 # No.of control points in xi  direction
+ncpxi    = 3 # No.of control points in xi  direction
 ncpeta   = 2 # No.of control points in eta direction
 
+# A switch class is implemented inorder to select the gauss points and weights according with 
+# degree of the curve in each direction.
 class Switcher(object):
           def indirect(self,i):
                    method_name='Gauss_'+str(i)
@@ -53,16 +55,6 @@ def GaussPoints(p,q):
 
 GPs_Ws = GaussPoints(p,q)
 
-# if(p==1 and q==1):
-#     #GPs_Ws = np.array([[-0.57735,-0.57735,1],[0.57735,-0.57735,1],[0.57735,0.57735,1],[-0.57735,0.57735,1]])
-#     GPs_Ws = np.array([[-1/(3**(1/2)),-1/(3**(1/2)),1],[1/(3**(1/2)),-1/(3**(1/2)),1],[1/(3**(1/2)),1/(3**(1/2)),1],[-1/(3**(1/2)),1/(3**(1/2)),1]])
-
-# else:
-#     GPs_Ws = np.array([[-1/(3**(1/2)),-1/(3**(1/2)),1],[1/(3**(1/2)),-1/(3**(1/2)),1],[1/(3**(1/2)),1/(3**(1/2)),1],[-1/(3**(1/2)),1/(3**(1/2)),1]])
-
-#     # GPs_Ws = np.array([[0.7746,0.7746,0.2743],[0.7746,-0.7746,0.2743],[0.7746,0.,0.4390],[-0.7746,0.7746,0.2743],
-#     #                     [-0.7746,-0.7746,0.2743],[-0.7746,0.,0.4390],[0.,0.7746,0.4390],[0.,-0.7746,0.4390],[0.,0.,0.7023]])
-
 p_ord=p+1 #order of the curve in xi direction
 q_ord=q+1 #order of the curve in eta direction
 
@@ -79,30 +71,16 @@ for j in range(ncpeta):
         P_W[j,i,1] = (Height/(ncpeta-1))*j
         P_W[j,i,2] = 0
         P_W[j,i,3] = 1                     # Weights for respective control points
-# P_W=np.array([[[0.,0.,0.,1.5],[2.,0.,0.,0.5],[4.,0.,0.,3],[6.,0.,0.,0.5],[8.,0.,0.,1.7]],
-#             [[0.,2.,0.,1.],[2.,2.,0.,0.5],[4.,2.,0.,3],[6.,2.,0.,0.2],[8.,2.,0.,1.5]],
-#             [[0.,4.,0.,1.5],[2.,4.,0.,0.1],[4.,4.,0.,10],[6.,4.,0.,0.5],[8.,4.,0.,5.]],
-#             [[0.,6.,0.,1.],[2.,6.,0.,0.5],[4.,6.,0.,0.01],[6.,6.,0.,0.8],[8.,6.,0.,1.]],
-#             [[0.,8.,0.,0.1],[2.,8.,0.,0.5],[4.,8.,0.,3],[6.,8.,0.,0.8],[8.,8.,0.,0.5]]])
 
-#----------------------Control points for Quater circle with a hole-----------------------#
-# P_W=np.array([[[1.,0.,0.,1],[0.853553,0.353553,0.,0.853553],[0.353553,0.853553,0.,0.853553],[0.,1.,0.,1]],
-#             [[2.5,0.,0.,1.],[2.5,0.75,0.,1.],[0.75,2.5,0.,1.],[0.,2.5,0.,1.]],
-#             [[4,0.,0.,1.],[4,4.,0.,1.],[4.,4.,0.,1.],[0.,4.,0.,1.]]])
 print(P_W)
 
 # Input control point vector to element routine as a transpose
 P_W_T = P_W.transpose((1,0,2))  #Here it is a 3D array (0,1,2) -- it is transposed to (1,0,2)
 
-#******Check how to dicide points in x and y direction*****************
-# ncpxi=np.shape(P_W)[1]  #No.of control points xi direction
-# ncpeta=np.shape(P_W)[0] #No.of control points eta direction
-
 U = KnotVector(p,ncpxi)
 V = KnotVector(q,ncpeta)
 print(U)
 print(V)
-
 
 n=(np.size(U)-1)-p-1
 m=(np.size(V)-1)-q-1
@@ -142,3 +120,5 @@ for i in range(0,nelV):
 knotConnectivity = knotConnectivity -1
 knotConnectivity = knotConnectivity.astype(int)
 print('knotConnectivity',knotConnectivity)
+print('Span_U',Span_U)
+print('Span_V',Span_V)
