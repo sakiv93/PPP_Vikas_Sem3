@@ -1,42 +1,40 @@
 #----------------------------------Displacement Driven------------------------------------------#
 #--------------------------------------27th March-----------------------------------------------#
 import numpy as np
-import matplotlib.pyplot as plt
-import math
-from scipy import special
-np.set_printoptions(threshold=np.inf)
 from Geometry import *
 from Material_Routine import *
 from preprocessing_functions import *
 
-def Jacobian12(xi,eta,elU,elV):
+def Jacobian12(xi,eta,elXI,elETA):
     """
     Input: 
         Input Parametric Co-ordinates (xi,eta) of Gauss Points
         ***Gauss Co-ordinates are defined in master space***
-        Knot span range (elU,elV) in xi and eta direction
+        Knot span range (elXI,elETA) in xi and eta direction
     Process: 
         Inputs functions involving partial derivatives of NURBS Basis Functions
         w.r.t to parametric co-ordinates and Calculates J1 matrix
     Return: 
-        The function returns Determinant of J1 and J2 matrix
+        The function returns J1 and determinant of J1 and J2 matrix
     """
     #------------Calculating J1-------------------------#
+    # J1 matrix for mapping from paramteric space to physical space.
 
-    dxi_dximas = 0.5*(elU[1]-elU[0])
-    deta_detamas = 0.5*(elV[1]-elV[0]) 
+    dxi_dximas = 0.5*(elXI[1]-elXI[0])          # Refer Equation 25 from Documentation
+    deta_detamas = 0.5*(elETA[1]-elETA[0])      # Refer Equation 26 from Documentation 
     J2det = dxi_dximas*deta_detamas
 
     #------------Calculating J2-------------------------#
+    # J2 matrix for mapping from master space to parametric space.
 
     #--------Evaluation of NURBS Surface basis functions derivatives---------#
-    Aders,wders = SurfaceDerivsAlgAuv(n,p,U,m,q,V,P,W,xi,eta,d)
+    Aders,wders = SurfaceDerivsAlgAuv(n,p,XI,m,q,ETA,P,W,xi,eta,d)
 
     #-----------------------------------------------------------------------------------------------
     dRx_dxi     = (Aders[1][0][0]*wders[0][0] - wders[1][0]*Aders[0][0][0])/(wders[0][0]*wders[0][0])
     dRy_dxi     = (Aders[1][0][1]*wders[0][0] - wders[1][0]*Aders[0][0][1])/(wders[0][0]*wders[0][0])
     dRx_deta    = (Aders[0][1][0]*wders[0][0] - wders[0][1]*Aders[0][0][0])/(wders[0][0]*wders[0][0])
-    dRy_deta     = (Aders[0][1][1]*wders[0][0] - wders[0][1]*Aders[0][0][1])/(wders[0][0]*wders[0][0])
+    dRy_deta    = (Aders[0][1][1]*wders[0][0] - wders[0][1]*Aders[0][0][1])/(wders[0][0]*wders[0][0])
     J1 = np.array([[dRx_dxi[0],dRx_deta[0]],
                 [dRy_dxi[0],dRy_deta[0]]])
 
@@ -60,16 +58,16 @@ def B_matrix(xi,eta,J1):
     Bu=np.zeros((3,nudof*necp))
     Be=np.zeros((2,necp))
     #---------------NURBS Basis Functions Derivatives wrt x and y-------------#
-    uspan = FindSpan(n,p,xi,U)
-    print('uspan',uspan)
-    vspan = FindSpan(m,q,eta,V)
-    print('vspan',vspan)
+    xi_span = FindSpan(n,p,xi,XI)
+    print('xi_span',xi_span)
+    eta_span = FindSpan(m,q,eta,ETA)
+    print('eta_span',eta_span)
     # Indices of non vanishing basis functions
-    NVu = np.arange(uspan-p,uspan+1,1)
-    print('NVu',NVu)
-    NVv = np.arange(vspan-q,vspan+1,1)
-    print('NVv',NVv)
-    Aders,wders = SurfaceDerivsAlgAuv(n,p,U,m,q,V,P,W,xi,eta,d)
+    NVxi = np.arange(xi_span-p,xi_span+1,1)
+    print('NVxi',NVxi)
+    NVeta = np.arange(eta_span-q,eta_span+1,1)
+    print('NVeta',NVeta)
+    Aders,wders = SurfaceDerivsAlgAuv(n,p,XI,m,q,ETA,P,W,xi,eta,d)
     Denom = wders[0][0]
     Denom_du = wders[1][0]
     Denom_dv = wders[0][1]
@@ -77,21 +75,21 @@ def B_matrix(xi,eta,J1):
     dR_dx = np.zeros((necpxi,necpeta))
     dR_dy = np.zeros((necpxi,necpeta))
     #---------------Loop over Non vanishing NURBS Basis Functions-------------#
-    for ii, ii_value in enumerate(NVu):
-        for jj, jj_value in enumerate(NVv):
-            BFu = BasisFuns(uspan,xi,p,U)
-            print('BasisFuncsU',BFu)
-            BFv = BasisFuns(vspan,eta,q,V)
-            print('BasisFuncsV',BFv)
-            # Num = BFu[ii]*BFv[jj]
-            Num = BFu[ii]*BFv[jj]**W[ii][jj]
+    for ii, ii_value in enumerate(NVxi):
+        for jj, jj_value in enumerate(NVeta):
+            BFxi = BasisFuns(xi_span,xi,p,XI)
+            print('BasisFuncsU',BFxi)
+            BFeta = BasisFuns(eta_span,eta,q,ETA)
+            print('BasisFuncsV',BFeta)
+            # Num = BFxi[ii]*BFeta[jj]
+            Num = BFxi[ii]*BFeta[jj]**W[ii][jj]
             print('Num',Num)
-            DBFu = DersBasisFuns(uspan,xi,p,d,U)
-            DBFv = DersBasisFuns(vspan,eta,q,d,V)
-            Num_du = DBFu[1][ii]*BFv[jj]*W[ii][jj]
-            Num_dv = BFu[ii]*DBFv[1][jj]*W[ii][jj]
-            dR_dxi = Num_du/Denom - Denom_du*Num/(Denom*Denom)
-            dR_deta = Num_dv/Denom - Denom_dv*Num/(Denom*Denom) 
+            DBFxi = DersBasisFuns(xi_span,xi,p,d,XI)
+            DBFeta = DersBasisFuns(eta_span,eta,q,d,ETA)
+            Num_dxi = DBFxi[1][ii]*BFeta[jj]*W[ii][jj]
+            Num_deta = BFxi[ii]*DBFeta[1][jj]*W[ii][jj]
+            dR_dxi = Num_dxi/Denom - Denom_du*Num/(Denom*Denom)
+            dR_deta = Num_deta/Denom - Denom_dv*Num/(Denom*Denom) 
 
             dR_dxi_dR_deta = np.array([dR_dxi,dR_deta])
             print('dR_dxi_dR_deta',dR_dxi_dR_deta)
@@ -99,13 +97,13 @@ def B_matrix(xi,eta,J1):
             print('dR_dx_dR_dy',dR_dx_dR_dy)
             dR_dx[ii][jj] = dR_dx_dR_dy[0]
             dR_dy[ii][jj] = dR_dx_dR_dy[1]
-            print('dR_du',dR_dx[ii][jj])
-            print('dR_dv',dR_dy[ii][jj])
-    #-------------Have to multiply dR_du / dR_dv matrix with jacobian matrix-------------------#
+            print('dR_dx',dR_dx[ii][jj])
+            print('dR_dy',dR_dy[ii][jj])
+    #-------------Have to multiply dR_dx / dR_dy matrix with jacobian matrix-------------------#
 
     #---------Flatten (Convert 2D to 1D array) DervsNURBS Function------------#
-    #dR_du(0,0)....dR_du(0,1),dR_du(1,0),.....dR_du(1,4).....dR_du(4,0),..........dR_du(4,4)
-    fdR_dx = (np.transpose(dR_dx)).flatten() #************Cross check this******************#
+    #dR_dx(0,0)....dR_dx(0,1),dR_dx(1,0),.....dR_dx(1,4).....dR_dx(4,0),..........dR_dx(4,4)
+    fdR_dx = (np.transpose(dR_dx)).flatten()
     print('fdR_dx',fdR_dx)
     fdR_dy = (np.transpose(dR_dy)).flatten()
     print('fdR_dv',fdR_dy)
@@ -123,11 +121,11 @@ def B_matrix(xi,eta,J1):
         Be[1,i2] = fdR_dy[i2]
     return Bu,Be
 
-def elementRoutine(U_e,elU,elV,T_m):
+def elementRoutine(U_e,elXI,elETA,T_m):
     """
     Input: 
         Input (U_e) matrix which contain DOF values 
-        Knot span range (elU,elV) in xi and eta direction
+        Knot span range (elXI,elETA) in xi and eta direction
     Process: 
         The element routine takes in information about the element 
         and loops over gauss points and perform numerical integration
@@ -138,35 +136,35 @@ def elementRoutine(U_e,elU,elV,T_m):
         Internal and External elemental force matrix, 
         Stress,Strain,Electric field and Electric displacements at Gauss points
     """
-    print('Elu,Elv:',elU,elV)
+    print('elXI,elETA:',elXI,elETA)
 
-    Kt_e = np.zeros(((nudof+nedof)*necp,(nudof+nedof)*necp))
-    K_MM=np.zeros((nudof*necp,nudof*necp))
-    K_ME=np.zeros((nudof*necp,nedof*necp))
-    K_EM=np.zeros((nedof*necp,nudof*necp))
-    K_EE=np.zeros((nedof*necp,nedof*necp))
-    Fu_int_e=np.zeros((nudof*necp,1))
-    Fe_int_e=np.zeros((nedof*necp,1))
-    F_int_e=np.zeros(((nudof+nedof)*necp,1))
-    sigma_ig=np.zeros((np.shape(GPs_Ws)[0],3,1))
-    epsilon_ig=np.zeros((np.shape(GPs_Ws)[0],3,1))
-    electric_field_ig = np.zeros((np.shape(GPs_Ws)[0],2,1))
-    Electrical_Displacement_ig = np.zeros((np.shape(GPs_Ws)[0],2,1))
+    Kt_e = np.zeros(((nudof+nedof)*necp,(nudof+nedof)*necp))            # Element stiffness matrix
+    K_MM=np.zeros((nudof*necp,nudof*necp))                              # Refer Equation 56 from Documentation
+    K_ME=np.zeros((nudof*necp,nedof*necp))                              # Refer Equation 57 from Documentation
+    K_EM=np.zeros((nedof*necp,nudof*necp))                              # Refer Equation 58 from Documentation
+    K_EE=np.zeros((nedof*necp,nedof*necp))                              # Refer Equation 59 from Documentation
+    Fu_int_e=np.zeros((nudof*necp,1))                                   # Internal force matrix (Mechanical)
+    Fe_int_e=np.zeros((nedof*necp,1))                                   # Internal force matrix (Electrical)
+    F_int_e=np.zeros(((nudof+nedof)*necp,1))                            # Internal force matrix
+    sigma_ig=np.zeros((np.shape(GPs_Ws)[0],3,1))                        # Stress matrix to store values at each gauss point
+    epsilon_ig=np.zeros((np.shape(GPs_Ws)[0],3,1))                      # Strain matrix to store values at each gauss point
+    electric_field_ig = np.zeros((np.shape(GPs_Ws)[0],2,1))             # Electrical field matrix to store values at each gauss point
+    Electrical_Displacement_ig = np.zeros((np.shape(GPs_Ws)[0],2,1))    # Electrical displacement matrix to store values at each gauss point
 
     #-----------Looping over gauss point-----------#
 
     for j in range(np.shape(GPs_Ws)[0]):
 
-        gp = GPs_Ws[j,0:2] # For fetching respective gauss points
-        wg = GPs_Ws[j,2]   # For fetching respective gauss point weights
-        ximas = gp[0]  # Gauss points in Master space
-        etamas = gp[1] # Gauss points in Master space
-        xi = 0.5*((elU[1]-elU[0])*ximas + (elU[1]+elU[0]))     # Gauss points in Parametric space
-        eta = 0.5*((elV[1]-elV[0])*etamas + (elV[1]+elV[0]))   # Gauss points in Parametric space
+        gp = GPs_Ws[j,0:2]      # For fetching respective gauss points
+        wg = GPs_Ws[j,2]        # For fetching respective gauss point weights
+        ximas = gp[0]       # Gauss points in Master space
+        etamas = gp[1]      # Gauss points in Master space
+        xi = 0.5*((elXI[1]-elXI[0])*ximas + (elXI[1]+elXI[0]))          # Gauss points in Parametric space
+        eta = 0.5*((elETA[1]-elETA[0])*etamas + (elETA[1]+elETA[0]))    # Gauss points in Parametric space
 
         #------Calling Jacobian12 Function to get J1 and J2 determinants-----------#
 
-        J1,J1det,J2det = Jacobian12(xi,eta,elU,elV)
+        J1,J1det,J2det = Jacobian12(xi,eta,elXI,elETA)
         print('J1 Matrix:',J1)
         print('Determinat of J1 : ',J1det)
         print('Determinat of J2 : ',J2det)
@@ -180,7 +178,8 @@ def elementRoutine(U_e,elU,elV,T_m):
         print('Bu:',Bumatrix)
         print('Be:',Bematrix)
 
-        # U_u contains mechanical displcement from node 1 to 4, and U_phi contains electric potential from node 1 to 4
+        # U_u contains mechanical displcement from control point 1 to total control points in the element
+        # U_phi contains electric potential from control point 1 to total control points in the element
         U_u=U_e[0:necp*nudof]
         U_phi = U_e[necp*nudof:]
         print('U_u',U_u)
@@ -212,17 +211,17 @@ def elementRoutine(U_e,elU,elV,T_m):
         BeeBu = np.matmul(np.transpose(Bematrix),eBu)
 
         kBe=np.matmul(k,Bematrix)
-        BekBe = -np.matmul(np.transpose(Bematrix),kBe)
+        BekBe = np.matmul(np.transpose(Bematrix),kBe)
 
         #------------------Numerical Integration-----------------------#
 
         K_MM = K_MM + BuCBu*J1det*J2det*wg*Thick
         K_ME = K_ME + BueBe*J1det*J2det*wg*Thick
         K_EM = K_EM + BeeBu*J1det*J2det*wg*Thick
-        K_EE = K_EE + BekBe*J1det*J2det*wg*Thick
+        K_EE = K_EE - BekBe*J1det*J2det*wg*Thick
 
-        #Arranging to Kt_e matrix (Local Stiffness matrix)
-        #    Kt_e = [K_MM K_ME]
+        #Arranging to Kt_e matrix (Local element Stiffness matrix)
+        #    Kt_e = [K_MM K_ME]         # Refer Equation 55 from Documentation
         #           [K_EM K_EE]
         Kt_e[0:necp*nudof,0:necp*nudof]                                     = K_MM
         Kt_e[0:necp*nudof,necp*nudof:necp*(nudof+nedof)]                    = K_ME
@@ -240,9 +239,9 @@ def elementRoutine(U_e,elU,elV,T_m):
         #-------Internal Force calculation for Electrical case
         Fe_int_e= Fe_int_e+np.matmul(np.transpose(Bematrix),Electrical_Displacement)*J1det*J2det*wg*Thick
 
-        # ------Arranging to local Forec_internal matrix 
-        F_int_e[0:nudof*necp] = Fu_int_e                              # 0 1 2 3 4 5 6 7
-        F_int_e[nudof*necp:(nudof*necp+nedof*necp)] = Fe_int_e        # 8 9 10 11
+        # ------Arranging to local Force_internal matrix 
+        F_int_e[0:nudof*necp] = Fu_int_e                              # 0 1 2 3 .... 2*ncep-2, 2*ncep-1
+        F_int_e[nudof*necp:(nudof*necp+nedof*necp)] = Fe_int_e        # 2*ncep, 2*ncep+1 .......  2*ncep+(ncep-1)
         #-------Initiating Force External as zero array because of displacement driven algorithm  
         F_ext_e = np.zeros_like(F_int_e)    
     return Kt_e, F_int_e, F_ext_e, sigma_ig, Electrical_Displacement_ig,epsilon_ig,electric_field_ig

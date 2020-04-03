@@ -1,10 +1,18 @@
 #----------------------------------Displacement Driven------------------------------------------#
 #--------------------------------------27th March-----------------------------------------------#
+
+#-----------------------------------------------------------------------------------------------#
+#                               List of variables used                                          #
+#           Ct- Elastic constants                                                               #
+#           e - Piezoelectric constants                                                         #
+#           k - dielectric constants                                                            #
+#           sigma - stress                                                                      #
+#           Electrical_Displacement - Electrical Displacement                                   #
+#           epsilon - strain values                                                             #
+#           electric_field - electric field values                                              #
+#-----------------------------------------------------------------------------------------------#
+
 import numpy as np
-import matplotlib.pyplot as plt
-import math
-from scipy import special
-np.set_printoptions(threshold=np.inf)
 from Material_Properties import *
 
 def materialRoutine(epsilon,electric_field, T_m):
@@ -23,6 +31,8 @@ def materialRoutine(epsilon,electric_field, T_m):
 
     # Calculating stress and electrical displacements
     sigma  = np.matmul(Ct,epsilon)-np.matmul(np.transpose(e),electric_field)
+    print('np.matmul(np.transpose(e),electric_field)',np.matmul(np.transpose(e),electric_field))
+    print('np.matmul(Ct,epsilon)',np.matmul(Ct,epsilon))
     Electrical_Displacement = np.matmul(e,epsilon)+np.matmul(k,electric_field)
 
 

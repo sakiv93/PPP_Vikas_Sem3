@@ -1,7 +1,18 @@
 #----------------------------------Displacement Driven------------------------------------------#
 #--------------------------------------27th March-----------------------------------------------#
+
+#-----------------------------------------------------------------------------------------------#
+#                               List of variables used                                          #
+#           Ct- Elastic constants                                                               #
+#           e - Piezoelectric constants                                                         #
+#           k - dielectric constants                                                            #
+#-----------------------------------------------------------------------------------------------#
+
 import numpy as np
 
+# A switcher class is used to select the material proprties according to the requirements.
+# Three cases are involved 
+# Linear Elastic case, Linear Electrical case and Linear Electro-Mechanical case
 class Switcher(object):
     def indirect(self,i):
             method_name='LoadCase_'+str(i)
@@ -9,7 +20,7 @@ class Switcher(object):
             return method()
     def LoadCase_1(self):
             #---------------------------------------------------------------------#
-            #                    Pure Mechanical Case                             #
+            #                    Mechanical Case                                  #
             #---------------------------------------------------------------------#
 
         #----------PZT-PIC151 Material Properties------------#
@@ -18,16 +29,16 @@ class Switcher(object):
         Ct = np.array([[110000,64000,0],[64000,100000,0],[0,0,20000]]) #Units MPa
 
         #---------------Piezoelectric constant matrix-----------------#
-        e = np.array([[0,0,0],[0,0,0]])                        #Units C/m^2
+        e = np.array([[0,0,0],[0,0,0]])                        #Units C/mm^2
 
         #---------------Dielectric material constants-----------------#
-        k = np.array([[7.54e-12,0],[0,9.82e-12]])                       #Units microF/m
+        k = np.array([[7.54e-12,0],[0,9.82e-12]])                       #Units F/mm
         return Ct,e,k
 
 
     def LoadCase_2(self):
             #---------------------------------------------------------------------#
-            #                    Pure Electrical Case                             #
+            #                    Electrical Case                                  #
             #---------------------------------------------------------------------#
 
         #----------PZT-PIC151 Material Properties------------#
@@ -36,10 +47,10 @@ class Switcher(object):
         Ct = np.array([[110000,64000,0],[64000,100000,0],[0,0,20000]]) #Units MPa
 
         #---------------Piezoelectric constant matrix-----------------#
-        e = np.array([[0,0,0],[0,0,0]])                        #Units C/m^2
+        e = np.array([[0,0,0],[0,0,0]])                        #Units C/mm^2
 
         #---------------Dielectric material constants-----------------#
-        k = np.array([[7.54e-12,0],[0,9.82e-12]])                       #Units microF/m
+        k = np.array([[7.54e-12,0],[0,9.82e-12]])                       #Units F/mm
         return Ct,e,k
 
 
@@ -54,51 +65,18 @@ class Switcher(object):
         Ct = np.array([[110000.,64000.,0.],[64000.,100000.,0.],[0.,0.,20000.]]) #Units MPa
 
         #---------------Piezoelectric constant matrix-----------------#
-        e = np.array([[0.,0.,12.0e-6],[-9.6e-6,15.1e-6,0.]])                        #Units C/m^2
+        e = np.array([[0.,0.,12.0e-6],[-9.6e-6,15.1e-6,0.]])                        #Units C/mm^2
 
         #---------------Dielectric material constants-----------------#
-        k = np.array([[7.54e-12,0],[0,9.82e-12]])                         #Units microF/m
+        k = np.array([[7.54e-12,0],[0,9.82e-12]])                         #Units F/mm
         return Ct,e,k
 
 
+# Can select the below parameter according to the test case requirement
+#   1 - Linear Elastic Loading
+#   2 - Linear Electrical Loading
+#   3 - Linear Electro-Mechanical Loading
 LoadCaseNumber = 3
-
 
 s=Switcher()
 Ct,e,k  = s.indirect(LoadCaseNumber)
-print(Ct)
-print(e)
-print(k)
-
-
-
-# #----------PZT-PIC151 Material Properties------------#
-# #-----------------------Elastic Constants------------------------------#
-# yield_stress=210 #MPa
-# youngs_modulus=210000 #N/mm^2 #MPa
-# poissons_ratio=0.30
-# #Ct = np.array([[110000,64000,0],[64000,100000,0],[0,0,20000]]) #Units MPa
-
-# #---------------Piezoelectric constant matrix-----------------#
-# e = np.array([[0,0,12.0],[-9.6,15.1,0]])  
-# #e = np.array([[0,0,0],[0,0,0]])                   #Units C/m^2
-
-# #---------------Dielectric material constants-----------------#
-# k = np.array([[0.00754,0],[0,0.00982]]) 
-# #k = np.array([[0,0],[0,0]])                     #Units microF/m
-
-
-# #---------------------------------------------------------------------#
-# #                    Electro Mechanical Case                          #
-# #---------------------------------------------------------------------#
-
-# yield_stress=210 #MPa
-# youngs_modulus=210000 #N/mm^2 #MPa
-# poissons_ratio=0.30
-# #---------------Piezoelectric constant matrix-----------------#
-# # Give here reference for values taken from
-# e = np.array([[0,0,1.271e-5],[-5.207e-6,15.08e-6,0]])  #Units C/mm^2
-# #---------------Dielectric material constants-----------------#
-# # Give here reference for values taken from
-# k = np.array([[6.752e-12,0],[0,5.872e-12]])             #Units Write units
-# return yield_stress,youngs_modulus,poissons_ratio,e,k
