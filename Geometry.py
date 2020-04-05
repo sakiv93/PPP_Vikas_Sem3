@@ -6,7 +6,9 @@
 #           ncpxi, ncpeta   - No.of control points in xi and eta direction respectively         #
 #           Pw              - Control points matrix                                             #
 #           XI, ETA         - Knot Vectors in xi and eta direction respectively                 #
+#           xi,eta          - Parametric coordinates in xi and eta direction respectively       #
 #           ncp             - Total number of control points                                    #
+#           necp            - Total number of control points in an element                      # 
 #           nel             - Total number of elements                                          #
 #-----------------------------------------------------------------------------------------------#
 import numpy as np
@@ -51,8 +53,6 @@ def GaussPoints(p,q):
     s=Switcher()
     GaussPoints_xi  = s.indirect(p)
     GaussPoints_eta = s.indirect(q)
-    print(GaussPoints_xi)
-    print(GaussPoints_eta)
     k=0
     for i in range(p+1):
         for j in range(q+1):
@@ -80,15 +80,11 @@ for j in range(ncpeta):
         Pw[j,i,2] = 0
         Pw[j,i,3] = 1                     # Weights for respective control points
 
-print(Pw)
-
 # Input control point vector to element routine as a transpose
 Pw_T = Pw.transpose((1,0,2))  #Here it is a 3D array (0,1,2) -- it is transposed to (1,0,2)
 
 XI = KnotVector(p,ncpxi)    # Knot Vector in xi  direction
-ETA = KnotVector(q,ncpeta)  # Knot Vector in eta direction
-print(XI)
-print(ETA)
+ETA = KnotVector(q,ncpeta)  # Knot Vector in eta direction)
 
 n=(np.size(XI)-1)-p-1
 m=(np.size(ETA)-1)-q-1
@@ -130,7 +126,4 @@ for i in range(0,nelETA):
         count=count+1
 knotConnectivity = knotConnectivity -1
 knotConnectivity = knotConnectivity.astype(int)
-print('knotConnectivity',knotConnectivity)
-print('Span_XI',Span_XI)
-print('Span_ETA',Span_ETA)
 #------------------------------------------------------------------------------------------------# 

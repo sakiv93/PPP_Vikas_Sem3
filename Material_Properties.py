@@ -1,6 +1,3 @@
-#----------------------------------Displacement Driven------------------------------------------#
-#--------------------------------------27th March-----------------------------------------------#
-
 #-----------------------------------------------------------------------------------------------#
 #                               List of variables used                                          #
 #           Ct- Elastic constants                                                               #
@@ -26,13 +23,13 @@ class Switcher(object):
         #----------PZT-PIC151 Material Properties------------#
 
         #-----------------------Elastic Constants------------------------------#
-        Ct = np.array([[110000,64000,0],[64000,100000,0],[0,0,20000]]) #Units MPa
+        Ct = np.array([[110000,64000,0],[64000,100000,0],[0,0,20000]])  #Units MPa
 
         #---------------Piezoelectric constant matrix-----------------#
-        e = np.array([[0,0,0],[0,0,0]])                        #Units C/mm^2
+        e = np.array([[0,0,0],[0,0,0]])                                 #Units N/Vmm
 
         #---------------Dielectric material constants-----------------#
-        k = np.array([[7.54e-12,0],[0,9.82e-12]])                       #Units F/mm
+        k = np.array([[7.54e-9,0],[0,9.82e-9]])                         #Units N/V^2
         return Ct,e,k
 
 
@@ -44,13 +41,13 @@ class Switcher(object):
         #----------PZT-PIC151 Material Properties------------#
 
         #-----------------------Elastic Constants------------------------------#
-        Ct = np.array([[110000,64000,0],[64000,100000,0],[0,0,20000]]) #Units MPa
+        Ct = np.array([[110000,64000,0],[64000,100000,0],[0,0,20000]])  #Units MPa
 
         #---------------Piezoelectric constant matrix-----------------#
-        e = np.array([[0,0,0],[0,0,0]])                        #Units C/mm^2
+        e = np.array([[0,0,0],[0,0,0]])                                 #Units N/Vmm
 
         #---------------Dielectric material constants-----------------#
-        k = np.array([[7.54e-12,0],[0,9.82e-12]])                       #Units F/mm
+        k = np.array([[7.54e-9,0],[0,9.82e-9]])                         #Units N/V^2
         return Ct,e,k
 
 
@@ -62,13 +59,13 @@ class Switcher(object):
         #----------PZT-PIC151 Material Properties------------#
 
         #-----------------------Elastic Constants------------------------------#
-        Ct = np.array([[110000.,64000.,0.],[64000.,100000.,0.],[0.,0.,20000.]]) #Units MPa
+        Ct = np.array([[110000.,64000.,0.],[64000.,100000.,0.],[0.,0.,20000.]])     #Units MPa
 
         #---------------Piezoelectric constant matrix-----------------#
-        e = np.array([[0.,0.,12.0e-6],[-9.6e-6,15.1e-6,0.]])                        #Units C/mm^2
+        e = np.array([[0.,0.,12.0e-3],[-9.6e-3,15.1e-3,0.]])                        #Units N/Vmm
 
         #---------------Dielectric material constants-----------------#
-        k = np.array([[7.54e-12,0],[0,9.82e-12]])                         #Units F/mm
+        k = np.array([[7.54e-9,0],[0,9.82e-9]])                                     #Units N/V^2
         return Ct,e,k
 
 

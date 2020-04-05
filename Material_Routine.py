@@ -3,13 +3,13 @@
 
 #-----------------------------------------------------------------------------------------------#
 #                               List of variables used                                          #
-#           Ct- Elastic constants                                                               #
-#           e - Piezoelectric constants                                                         #
-#           k - dielectric constants                                                            #
-#           sigma - stress                                                                      #
+#           Ct                      - Elastic constants                                         #
+#           e                       - Piezoelectric constants                                   #
+#           k                       - dielectric constants                                      #
+#           sigma                   - stress                                                    #
+#           epsilon                 - strain values                                             #
 #           Electrical_Displacement - Electrical Displacement                                   #
-#           epsilon - strain values                                                             #
-#           electric_field - electric field values                                              #
+#           electric_field          - electric field values                                     #
 #-----------------------------------------------------------------------------------------------#
 
 import numpy as np
@@ -31,8 +31,6 @@ def materialRoutine(epsilon,electric_field, T_m):
 
     # Calculating stress and electrical displacements
     sigma  = np.matmul(Ct,epsilon)-np.matmul(np.transpose(e),electric_field)
-    print('np.matmul(np.transpose(e),electric_field)',np.matmul(np.transpose(e),electric_field))
-    print('np.matmul(Ct,epsilon)',np.matmul(Ct,epsilon))
     Electrical_Displacement = np.matmul(e,epsilon)+np.matmul(k,electric_field)
 
 
